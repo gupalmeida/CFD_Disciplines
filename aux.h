@@ -7,39 +7,25 @@ typedef struct results{
     double *rho;
     double *energy;
     double *iEnergy;
-    double **Q;
-    double **E;
+    double *Q1;
+    double *Q2;
+    double *Q3;
+    double *E1;
+    double *E2;
+    double *E3;
+    /*
     double **A;
+    */
 }results;
 
-typedef struct exact{
-    double pr;
-    double p2;
-    double p3;
-    double pl;
-    double p5;
-    double u1;
-    double u2;
-    double u3;
-    double u4;
-    double u5;
-    double r1;
-    double r2;
-    double r3;
-    double r4;
-    double r5;
-    double e1;
-    double e2;
-    double e3;
-    double e4;
-    double e5;
-}exact;
 /* AUXILIARY FUNCTIONS AND DEFINITIONS */
 
 void allocSolution(results *);
-void allocVecSol(results *);
+void freeSolution(results *);
 void initSolution(results *);
+/*
 void jacobian(results *);
+*/
 void calcPrimitives(results *);
 void calcFluxes(results *);
 
