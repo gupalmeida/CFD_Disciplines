@@ -13,6 +13,9 @@ typedef struct results{
     double *E1;
     double *E2;
     double *E3;
+    double *dissip1;
+    double *dissip2;
+    double *dissip3;
     /*
     double **A;
     */
@@ -28,5 +31,6 @@ void jacobian(results *);
 */
 void calcPrimitives(results *);
 void calcFluxes(results *);
+void calcDissipation(results *);
 
 #endif

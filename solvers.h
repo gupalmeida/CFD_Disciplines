@@ -1,6 +1,7 @@
 #ifndef SOLVERS_H
 #define SOLVERS_H
 
-void explicitBeamWarming(results *, grid *);
+void centeredScheme(results *, grid *);
+void exactSolution(results *, grid *);
 
 #endif

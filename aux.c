@@ -7,15 +7,7 @@
 #include "mesh.h"
 
 void allocSolution(results * solution){
-    /* Here you have memory allocation for the
-    *  solution variables. The elements in vectors
-    *  Q and E are accessed using the slicing
-    *  in the format Q[i][j], where i refers to
-    *  the equation and j to the point in the 
-    *  computational mesh. For the jacobian matrix
-    *  A[i][j] i and j refer to the element i, j
-    *  of the jacobian matrix only. */
-    solution->press = malloc(imax * sizeof(double));
+    solution->press = malloc((double) imax * sizeof(double));
     solution->vel = malloc(imax * sizeof(double));
     solution->rho = malloc(imax * sizeof(double));
     solution->energy = malloc(imax * sizeof(double));
@@ -26,13 +18,9 @@ void allocSolution(results * solution){
     solution->E1 = malloc(imax * sizeof(double));
     solution->E2 = malloc(imax * sizeof(double));
     solution->E3 = malloc(imax * sizeof(double));
-
-    /*
-    solution->A = malloc(3 * sizeof(double *));
-    for (int j = 0; j < 3; j++){
-        solution->A[j] = malloc(3 * sizeof(double));
-    }
-    */
+    solution->dissip1 = malloc(imax * sizeof(double));
+    solution->dissip2 = malloc(imax * sizeof(double));
+    solution->dissip3 = malloc(imax * sizeof(double));
 }
 
 void freeSolution(results * solution){
@@ -47,13 +35,9 @@ void freeSolution(results * solution){
     free(solution->E1);
     free(solution->E2);
     free(solution->E3);
-
-    /*
-    for (int j = 0; j < 3; j++){
-        free(solution->A[j]);
-    }
-    free(solution->A);
-    */
+    free(solution->dissip1);
+    free(solution->dissip2);
+    free(solution->dissip3);
 }
 
 void initSolution(results * solution){
@@ -63,10 +47,14 @@ void initSolution(results * solution){
         if (i <= mid){
             solution->press[i] = p4;
             solution->rho[i] = p4;
-            solution->energy[i] = 1.0/(gamma - 1.0);
-            solution->iEnergy[i] = (1.0/(gamma - 1.0))/solution->rho[i];
+            solution->energy[i] = p4/(gamma - 1.0);
+            solution->iEnergy[i] = (p4/(gamma - 1.0))/solution->rho[i];
         }
         else {
+            solution->press[i] = p1;
+            solution->rho[i] = p1;
+            solution->energy[i] = p1/(gamma - 1.0);
+            solution->iEnergy[i] = (p1/(gamma - 1.0))/solution->rho[i];
         }
     }
 
@@ -85,18 +73,9 @@ void initSolution(results * solution){
         solution->E2[i] = (solution->Q2[i] * solution->Q2[i])/solution->Q1[i] + solution->press[i];
         solution->E3[i] = (solution->Q3[i] + solution->press[i])*solution->vel[i];
     }
-}
 
-/*
-void jacobian(results * solution){
-    * The jacobian matrix is determined
-    *  by deriving the flux variables in
-    *  relation to the conserved ones. *
-    solution->A[0][0] = 0.0;
-    solution->A[0][1] = 1.0;
-    solution->A[0][2] = 0.0;
+    return;
 }
-*/
 
 void calcPrimitives(results * solution){
     double temp=0.0;
@@ -107,6 +86,8 @@ void calcPrimitives(results * solution){
         solution->press[j] = temp*(gamma-1.0);
         solution->iEnergy[j] = temp/solution->Q1[j];
     }
+
+    return;
 }
 
 void calcFluxes(results * solution){
@@ -114,5 +95,32 @@ void calcFluxes(results * solution){
         solution->E1[j] = solution->Q2[j];
         solution->E2[j] = (solution->Q2[j] * solution->Q2[j])/solution->Q1[j] + solution->press[j];
         solution->E3[j] = (solution->Q3[j] + solution->press[j])*solution->vel[j];
+    }
+
+    return;
+}
+
+void calcDissipation(results * solution){
+    switch (dissipModel){
+        case 0:
+            for (int j = 0; j < imax; j++){
+                solution->dissip1[j] = (alpha/8.0)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
+                solution->dissip2[j] = (alpha/8.0)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
+                solution->dissip3[j] = (alpha/8.0)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
+            }
+            break;
+        case 1:
+            for (int j = 0; j < imax; j++){
+                solution->dissip1[j] = -(alpha/8.0)*(solution->Q1[j+2] - 4.0*solution->Q1[j+1] + 6.0*solution->Q1[j] - 4.0*solution->Q1[j-1] + solution->Q1[j-2]);
+                solution->dissip2[j] = -(alpha/8.0)*(solution->Q2[j+2] - 4.0*solution->Q2[j+1] + 6.0*solution->Q2[j] - 4.0*solution->Q2[j-1] + solution->Q2[j-2]);
+                solution->dissip3[j] = -(alpha/8.0)*(solution->Q3[j+2] - 4.0*solution->Q3[j+1] + 6.0*solution->Q3[j] - 4.0*solution->Q3[j-1] + solution->Q3[j-2]);
+            }
+            break;
+        default:
+            for (int j = 0; j < imax; j++){
+                solution->dissip1[j] = (alpha/8.0)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
+                solution->dissip2[j] = (alpha/8.0)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
+                solution->dissip3[j] = (alpha/8.0)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
+            }
     }
 }
