@@ -7,6 +7,7 @@
 #include "aux.h"
 #include "solvers.h"
 
+/* beam and warming explicit centered scheme */
 void centeredScheme(results * solution, grid * mesh){
     /* BEAM and WARMING method using explicit
     *  Euler as time marching method and a
@@ -24,6 +25,7 @@ void centeredScheme(results * solution, grid * mesh){
     double a = sqrt(gamma);
     double dt = (dx*cfl)/a;
     double t = 0.0;
+    double lambda = dt/dx;
 
     printf("\n\n===============================\n");
     printf("         Centered Scheme\n");
@@ -34,13 +36,13 @@ void centeredScheme(results * solution, grid * mesh){
         calcFluxes(solution);
 
         /* calculates dissipation for the current solution Q */
-        calcDissipation(solution);
+        calcDissipation(solution, lambda);
 
         /* marching the solution */
         for (int j = 2; j < imax-2; j++){
-            Q1np1[j] = solution->Q1[j] - 0.5*(dt/dx)*(solution->E1[j+1] - solution->E1[j-1]) + solution->dissip1[j];
-            Q2np1[j] = solution->Q2[j] - 0.5*(dt/dx)*(solution->E2[j+1] - solution->E2[j-1]) + solution->dissip2[j];
-            Q3np1[j] = solution->Q3[j] - 0.5*(dt/dx)*(solution->E3[j+1] - solution->E3[j-1]) + solution->dissip3[j];
+            Q1np1[j] = solution->Q1[j] - 0.5*lambda*(solution->E1[j+1] - solution->E1[j-1]) + lambda*(solution->dissip1[j]);
+            Q2np1[j] = solution->Q2[j] - 0.5*lambda*(solution->E2[j+1] - solution->E2[j-1]) + lambda*(solution->dissip2[j]);
+            Q3np1[j] = solution->Q3[j] - 0.5*lambda*(solution->E3[j+1] - solution->E3[j-1]) + lambda*(solution->dissip3[j]);
         }
         for (int j = 2; j < imax-2; j++){
             solution->Q1[j] = Q1np1[j];
@@ -53,7 +55,240 @@ void centeredScheme(results * solution, grid * mesh){
         it++;
     
         if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
-            printf("Iteration: %d, simulation time: %lf, time step: %lf\n",it,t,dt);
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
+        }
+    }
+
+    /* deallocating variables */
+    free(Q1np1);
+    free(Q2np1);
+    free(Q3np1);
+
+    printf("\n\n");
+
+}
+
+/* lax-wendroff method */
+void laxWendroff(results * solution, grid * mesh){
+    /* LAX-WENDROFF method using explicit
+    *  Euler as time marching method.
+    *  =======================================
+    *  Qjnp1 = Qjn - 0.5*lambda*(Ejp1 - Ejm1)
+    *        + 0.5*lambda2*(Ajph*(Ejp1 - Ej))
+    *        - 0.5*lambda2*(Ajmh*(Ej - Ejm1))
+    *  ======================================= */
+    
+    double *Q1np1 = malloc(imax * sizeof(double));
+    double *Q2np1 = malloc(imax * sizeof(double));
+    double *Q3np1 = malloc(imax * sizeof(double));
+    int it = 0;
+    double dx = mesh->x[1] - mesh->x[0];
+    double q1, q2, q3;
+    double temp1, temp2, temp3;
+    double a = sqrt(gamma);
+    double dt = (dx*cfl)/a;
+    double t = 0.0;
+    double lambda = dt/dx;
+
+    printf("\n\n===============================\n");
+    printf("       Lax-Wendroff Scheme\n");
+    printf("===============================\n\n");
+    
+    while (t <= (double) tmax && it < (int) itmax){
+        /* calculates the flux vector */
+        calcFluxes(solution);
+
+        /* calculates dissipation for the current solution Q */
+        calcDissipation(solution, lambda);
+
+        /* marching the solution */
+        for (int j = 2; j < imax-2; j++){
+            /* calculating the variables in point j+1/2 */
+            q1 = 0.5*(solution->Q1[j] + solution->Q1[j+1]);
+            q2 = 0.5*(solution->Q2[j] + solution->Q2[j+1]);
+            q3 = 0.5*(solution->Q3[j] + solution->Q3[j+1]);
+
+            calcJacobian(q1,q2,q3,solution);
+
+            temp1 = solution->Q1[j] 
+                - 0.5*lambda*(solution->E1[j+1] - solution->E1[j-1]) 
+                + 0.5*lambda*lambda*(solution->A[0][0]*(solution->E1[j+1]-solution->E1[j]) + solution->A[0][1]*(solution->E2[j+1]-solution->E2[j]) + solution->A[0][2]*(solution->E3[j+1]-solution->E3[j]));
+
+            temp2 = solution->Q2[j] 
+                - 0.5*lambda*(solution->E2[j+1] - solution->E2[j-1]) 
+                + 0.5*lambda*lambda*(solution->A[1][0]*(solution->E1[j+1]-solution->E1[j]) + solution->A[1][1]*(solution->E2[j+1]-solution->E2[j]) + solution->A[1][2]*(solution->E3[j+1]-solution->E3[j]));
+
+            temp3 = solution->Q3[j] 
+                - 0.5*lambda*(solution->E3[j+1] - solution->E3[j-1]) 
+                + 0.5*lambda*lambda*(solution->A[2][0]*(solution->E1[j+1]-solution->E1[j]) + solution->A[2][1]*(solution->E2[j+1]-solution->E2[j]) + solution->A[2][2]*(solution->E3[j+1]-solution->E3[j]));
+
+            /* calculating the variables in point j-1/2 */
+            q1 = 0.5*(solution->Q1[j] + solution->Q1[j-1]);
+            q2 = 0.5*(solution->Q2[j] + solution->Q2[j-1]);
+            q3 = 0.5*(solution->Q3[j] + solution->Q3[j-1]);
+
+            calcJacobian(q1,q2,q3,solution);
+
+            Q1np1[j] = temp1
+                - 0.5*lambda*lambda*(solution->A[0][0]*(solution->E1[j]-solution->E1[j-1]) + solution->A[0][1]*(solution->E2[j]-solution->E2[j-1]) + solution->A[0][2]*(solution->E3[j]-solution->E3[j-1]))
+                + lambda*(solution->dissip1[j]);
+
+            Q2np1[j] = temp2
+                - 0.5*lambda*lambda*(solution->A[1][0]*(solution->E1[j]-solution->E1[j-1]) + solution->A[1][1]*(solution->E2[j]-solution->E2[j-1]) + solution->A[1][2]*(solution->E3[j]-solution->E3[j-1]))
+                + lambda*(solution->dissip2[j]);
+
+            Q3np1[j] = temp3
+                - 0.5*lambda*lambda*(solution->A[2][0]*(solution->E1[j]-solution->E1[j-1]) + solution->A[2][1]*(solution->E2[j]-solution->E2[j-1]) + solution->A[2][2]*(solution->E3[j]-solution->E3[j-1]))
+                + lambda*(solution->dissip3[j]);
+        }
+        for (int j = 2; j < imax-2; j++){
+            solution->Q1[j] = Q1np1[j];
+            solution->Q2[j] = Q2np1[j];
+            solution->Q3[j] = Q3np1[j];
+        }
+
+        calcPrimitives(solution);
+        t = t + dt;
+        it++;
+    
+        if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
+        }
+    }
+
+    /* deallocating variables */
+    free(Q1np1);
+    free(Q2np1);
+    free(Q3np1);
+
+    printf("\n\n");
+
+}
+
+/* classical predictor-corrector macCormack scheme */
+void macCormack(results * solution, grid * mesh){
+    /* MACCORMACK method using explicit
+    *  Euler as time marching method.
+    *  ==============================================
+    *  predictor step
+    *  bQjnp1 = Qjn - lambda*(Ejp1 - Ej)
+    *  
+    *  corrector step
+    *  Qjnp1 = 0.5*(Qjn + bQjnp1 - lambda*(Ej - Ejm1)
+    *  ============================================== */
+    
+    double *Q1np1 = malloc(imax * sizeof(double));
+    double *Q2np1 = malloc(imax * sizeof(double));
+    double *Q3np1 = malloc(imax * sizeof(double));
+    double bQ1np1, bQ2np1, bQ3np1;
+    int it = 0;
+    double dx = mesh->x[1] - mesh->x[0];
+    double a = sqrt(gamma);
+    double dt = (dx*cfl)/a;
+    double t = 0.0;
+    double lambda = dt/dx;
+
+    printf("\n\n===============================\n");
+    printf("         MacCormack Scheme\n");
+    printf("===============================\n\n");
+    
+    while (t <= (double) tmax && it < (int) itmax){
+        /* calculates the flux vector */
+        calcFluxes(solution);
+
+        /* calculates dissipation for the current solution Q */
+        calcDissipation(solution, lambda);
+
+        /* marching the solution */
+        for (int j = 2; j < imax-2; j++){
+            /* predictor step */
+            bQ1np1 = solution->Q1[j] - lambda*(solution->E1[j+1] - solution->E1[j]);
+            bQ2np1 = solution->Q2[j] - lambda*(solution->E2[j+1] - solution->E2[j]);
+            bQ3np1 = solution->Q3[j] - lambda*(solution->E3[j+1] - solution->E3[j]);
+
+            /* corrector step */
+            Q1np1[j] = 0.5*(solution->Q1[j] + bQ1np1 - lambda*(solution->E1[j] - solution->E1[j-1])) + lambda*(solution->dissip1[j]);
+            Q2np1[j] = 0.5*(solution->Q2[j] + bQ2np1 - lambda*(solution->E2[j] - solution->E2[j-1])) + lambda*(solution->dissip2[j]);
+            Q3np1[j] = 0.5*(solution->Q3[j] + bQ3np1 - lambda*(solution->E3[j] - solution->E3[j-1])) + lambda*(solution->dissip3[j]);
+        }
+        for (int j = 2; j < imax-2; j++){
+            solution->Q1[j] = Q1np1[j];
+            solution->Q2[j] = Q2np1[j];
+            solution->Q3[j] = Q3np1[j];
+        }
+
+        calcPrimitives(solution);
+        t = t + dt;
+        it++;
+    
+        if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
+        }
+    }
+
+    /* deallocating variables */
+    free(Q1np1);
+    free(Q2np1);
+    free(Q3np1);
+
+    printf("\n\n");
+
+}
+
+/* steger and warming flux vector splitting scheme */
+void stegerWarming(results * solution, grid * mesh){
+    /* STEGER AND WARMING flux vector splitting scheme
+    *  using explicit Euler as time marching method.
+    *  ==============================================
+    *  Qjnp1 = Qjn -
+    *  ============================================== */
+    
+    double *Q1np1 = malloc(imax * sizeof(double));
+    double *Q2np1 = malloc(imax * sizeof(double));
+    double *Q3np1 = malloc(imax * sizeof(double));
+    int it = 0;
+    double dx = mesh->x[1] - mesh->x[0];
+    double a = sqrt(gamma);
+    double dt = (dx*cfl)/a;
+    double t = 0.0;
+    double lambda = dt/dx;
+
+    printf("\n\n=================================\n");
+    printf("  Steger and Warming FVS Scheme\n");
+    printf("=================================\n\n");
+    
+    while (t <= (double) tmax && it < (int) itmax){
+        /* calculates the flux vector */
+        calcStegerFluxes(solution);
+
+        /* calculates dissipation for the current solution Q */
+        //calcDissipation(solution, lambda);
+
+        /* marching the solution */
+        for (int j = 2; j < imax-2; j++){
+            Q1np1[j] = solution->Q1[j]
+                - lambda*(solution->E1p[j] - solution->E1p[j-1])
+                - lambda*(solution->E1m[j+1] - solution->E1m[j]);
+            Q2np1[j] = solution->Q2[j]
+                - lambda*(solution->E2p[j] - solution->E2p[j-1])
+                - lambda*(solution->E2m[j+1] - solution->E2m[j]);
+            Q3np1[j] = solution->Q3[j]
+                - lambda*(solution->E3p[j] - solution->E3p[j-1])
+                - lambda*(solution->E3m[j+1] - solution->E3m[j]);
+        }
+
+        for (int j = 2; j < imax-2; j++){
+            solution->Q1[j] = Q1np1[j];
+            solution->Q2[j] = Q2np1[j];
+            solution->Q3[j] = Q3np1[j];
+        }
+
+        calcPrimitives(solution);
+        t = t + dt;
+        it++;
+    
+        if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
         }
     }
 
@@ -67,6 +302,8 @@ void centeredScheme(results * solution, grid * mesh){
 }
 
 
+
+/* exact solution */
 void exactSolution (results * solution, grid * mesh){
 
 	double pr1,pr2,pr3,pr4,pr6;

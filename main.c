@@ -25,17 +25,34 @@ int main(){
     initSolution(&solution);
     //writeSolution(&solution,&mesh);
 
-    /* calculating the exact solution */
+    /* computing the exact solution */
     exactSolution(&exact,&mesh);
     writeSolution(&exact,&mesh,"exact.dat");
 
     /* solving Euler equations */
-    centeredScheme(&solution,&mesh);
+    switch (method){
+        case 0:
+            centeredScheme(&solution,&mesh);
+            break;
+        case 1:
+            laxWendroff(&solution,&mesh);
+            break;
+        case 2:
+            macCormack(&solution,&mesh);
+            break;
+        case 3:
+            stegerWarming(&solution,&mesh);
+            break;
+        default:
+            centeredScheme(&solution,&mesh);
+            break;
+    } 
 
     /* writting output file */
     writeSolution(&solution,&mesh,filename);
     freeMesh(&mesh);
     freeSolution(&solution);
+    //freeSolution(&exact);
 }
 
 void writeSolution(results * solution, grid * mesh, char fileName[]){

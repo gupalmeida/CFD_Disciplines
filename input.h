@@ -5,7 +5,7 @@
 #define filename "output.dat"
 
 // Inputs
-#define p4 40.0
+#define p4 50.0
 #define p1 1.0
 #define tol 1.0e-5
 
@@ -30,17 +30,40 @@
 #define gamma 1.4
 
 // Method selection
-#define method 1
+#define method 3
+#define order 1
+#define alpha 0.4
+#define dissipModel 2
 
-/* Dissipation model parameters */
-#define alpha 0.3
-#define dissipModel 1
-/* For alpha is a constant value used
+/* Alpha is a constant value used
    in the linear dissipation model.
    The model is selected by the dissipModel
    parameter in which
    0 - linear 2nd order difference model
    1 - linear 4th order difference model
    2 - non-linear jameson model */
+
+/* The order parameter sets the spatial discretization
+   order for the vector flux splitting schemes
+   which uses one-sided discretization for each
+   of the flux vectors (backward for E+ and forward
+   for E-).
+   The available options are:
+         1 - first order
+         2 - second order */
+
+/* The solution method is selected by changing
+   the method value.
+   Available solution methods
+   0 - centered scheme
+   1 - Lax-Wendroff method
+   2 - McCormack method
+   3 - Steger and Warming FVS scheme
+   4 - 
+   5 - 
+   6 - 
+   7 - 
+   8 -  */
+
 
 #endif
