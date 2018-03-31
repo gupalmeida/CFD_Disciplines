@@ -1,4 +1,0 @@
-# !/bin/bash
-gnuplot plotr.gnu
-gnuplot plotp.gnu
-gnuplot plotu.gnu
