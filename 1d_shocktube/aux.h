@@ -35,9 +35,12 @@ void jacobian(results *);
 */
 void calcPrimitives(results *);
 double max(double a, double b);
+double min(double a, double b);
 void calcFluxes(results *);
 void calcStegerFluxes(results *);
 void calcVanLeerFluxes(results *);
+void calcLiouFluxes(results *);
+void calcRoeFluxes(results *);
 void calcDissipation(results *, double lambda);
 void calcJacobian(double q1, double q2, double q3, results *);
 

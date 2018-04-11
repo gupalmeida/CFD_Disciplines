@@ -443,48 +443,20 @@ void liouAUSMplus(results * solution, grid * mesh){
     
     while (t <= (double) tmax && it < (int) itmax){
         /* calculates the flux vector */
-        calcVanLeerFluxes(solution);
+        calcFluxes(solution);
+        calcLiouFluxes(solution);
 
         /* calculates dissipation for the current solution Q */
         //calcDissipation(solution, lambda);
 
         /* marching the solution */
         for (int j = 2; j < imax-2; j++){
-            switch (order){
-                case 1:
-                    Q1np1[j] = solution->Q1[j]
-                        - lambda*(solution->E1p[j] - solution->E1p[j-1])
-                        - lambda*(solution->E1m[j+1] - solution->E1m[j]);
-                    Q2np1[j] = solution->Q2[j]
-                        - lambda*(solution->E2p[j] - solution->E2p[j-1])
-                        - lambda*(solution->E2m[j+1] - solution->E2m[j]);
-                    Q3np1[j] = solution->Q3[j]
-                        - lambda*(solution->E3p[j] - solution->E3p[j-1])
-                        - lambda*(solution->E3m[j+1] - solution->E3m[j]);
-                    break;
-                case 2:
-                    Q1np1[j] = solution->Q1[j]
-                        - (lambda/2.0)*(3.0*solution->E1p[j] - 4.0*solution->E1p[j-1] + solution->E1p[j-2])
-                        - (lambda/2.0)*(-3.0*solution->E1m[j] + 4.0*solution->E1m[j+1] - solution->E1m[j+2]);
-                    Q2np1[j] = solution->Q2[j]
-                        - (lambda/2.0)*(3.0*solution->E2p[j] - 4.0*solution->E2p[j-1] + solution->E2p[j-2])
-                        - (lambda/2.0)*(-3.0*solution->E2m[j] + 4.0*solution->E2m[j+1] - solution->E2m[j+2]);
-                    Q3np1[j] = solution->Q3[j]
-                        - (lambda/2.0)*(3.0*solution->E3p[j] - 4.0*solution->E3p[j-1] + solution->E3p[j-2])
-                        - (lambda/2.0)*(-3.0*solution->E3m[j] + 4.0*solution->E3m[j+1] - solution->E3m[j+2]);
-                    break;
-                default:
-                    Q1np1[j] = solution->Q1[j]
-                        - lambda*(solution->E1p[j] - solution->E1p[j-1])
-                        - lambda*(solution->E1m[j+1] - solution->E1m[j]);
-                    Q2np1[j] = solution->Q2[j]
-                        - lambda*(solution->E2p[j] - solution->E2p[j-1])
-                        - lambda*(solution->E2m[j+1] - solution->E2m[j]);
-                    Q3np1[j] = solution->Q3[j]
-                        - lambda*(solution->E3p[j] - solution->E3p[j-1])
-                        - lambda*(solution->E3m[j+1] - solution->E3m[j]);
-                    break;
-            }
+            Q1np1[j] = solution->Q1[j]
+                - lambda*(solution->E1p[j] - solution->E1p[j-1]);
+            Q2np1[j] = solution->Q2[j]
+                - lambda*(solution->E2p[j] - solution->E2p[j-1]);
+            Q3np1[j] = solution->Q3[j]
+                - lambda*(solution->E3p[j] - solution->E3p[j-1]);
         }
 
         for (int j = 2; j < imax-2; j++){
@@ -511,7 +483,69 @@ void liouAUSMplus(results * solution, grid * mesh){
 
 }
 
+/* Roe approximate Riemann solver method */
+void roeMethod(results * solution, grid * mesh){
+    /* ROE approximate riemann solver method
+    *  using explicit Euler as time marching method.
+    *  ==============================================
+    *  Qjnp1 = Qjn -
+    *  ============================================== */
+    
+    double *Q1np1 = malloc(imax * sizeof(double));
+    double *Q2np1 = malloc(imax * sizeof(double));
+    double *Q3np1 = malloc(imax * sizeof(double));
+    int it = 0;
+    double dx = mesh->x[1] - mesh->x[0];
+    double a = sqrt(gamma);
+    double dt = (dx*cfl)/a;
+    double t = 0.0;
+    double lambda = dt/dx;
 
+    printf("\n\n==========================================\n");
+    printf("     Roe\'s approximate Riemann solver     \n");
+    printf("==========================================\n");
+    
+    while (t <= (double) tmax && it < (int) itmax){
+        /* calculates the flux vector */
+        calcFluxes(solution);
+        calcRoeFluxes(solution);
+
+        /* calculates dissipation for the current solution Q */
+        //calcDissipation(solution, lambda);
+
+        /* marching the solution */
+        for (int j = 2; j < imax-2; j++){
+            Q1np1[j] = solution->Q1[j]
+                - lambda*(solution->E1p[j] - solution->E1p[j-1]);
+            Q2np1[j] = solution->Q2[j]
+                - lambda*(solution->E2p[j] - solution->E2p[j-1]);
+            Q3np1[j] = solution->Q3[j]
+                - lambda*(solution->E3p[j] - solution->E3p[j-1]);
+        }
+
+        for (int j = 2; j < imax-2; j++){
+            solution->Q1[j] = Q1np1[j];
+            solution->Q2[j] = Q2np1[j];
+            solution->Q3[j] = Q3np1[j];
+        }
+
+        calcPrimitives(solution);
+        t = t + dt;
+        it++;
+    
+        if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
+        }
+    }
+
+    /* deallocating variables */
+    free(Q1np1);
+    free(Q2np1);
+    free(Q3np1);
+
+    printf("\n\n");
+
+}
 
 /* exact solution */
 void exactSolution (results * solution, grid * mesh){

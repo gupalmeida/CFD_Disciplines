@@ -5,7 +5,7 @@
 #define filename "output.dat"
 
 // Inputs
-#define p4 10.0
+#define p4 20.0
 #define p1 1.0
 #define tol 1.0e-5
 
@@ -30,18 +30,12 @@
 #define gamma 1.4
 
 // Method selection
-#define method 5
-#define order 2
-#define alpha 0.4
-#define dissipModel 2
-
-/* Alpha is a constant value used
-   in the linear dissipation model.
-   The model is selected by the dissipModel
-   parameter in which
-   0 - linear 2nd order difference model
-   1 - linear 4th order difference model
-   2 - non-linear jameson model */
+#define method 6
+#define order 1
+#define mu 0.4
+#define dissipModel 0
+#define soundSpeedType 1
+#define interfaceSoundSpeed 1
 
 /* The order parameter sets the spatial discretization
    order for the vector flux splitting schemes
@@ -52,6 +46,28 @@
          1 - first order
          2 - second order */
 
+/* mu is a constant value used
+   in the linear dissipation model.
+   The model is selected by the dissipModel
+   parameter in which
+   0 - linear 2nd order difference model
+   1 - linear 4th order difference model
+   2 - non-linear jameson model */
+
+/* soundSpeedType defines the way the code will
+   calculate the sound speed at each solution
+   point j. The available options are:
+       1 - a = aCritical * min( 1.0 , aCritical/|u| )
+       2 - a = sqrt( gamma * (p/rho) ) */
+
+/* interfaceSoundSpeed defines the way the code will
+   calculate the sound speed at the interface between
+   two solution points. The available options are:
+       1 - a = min ( a_left, a_right )
+       2 - a = 0.5 * ( a_left + a_right )
+       3 - a = sqrt( a_left * a_right )
+       4 - Roe averaged sound speed */
+
 /* The solution method is selected by changing
    the method value.
    Available solution methods
@@ -60,8 +76,8 @@
    2 - McCormack method
    3 - Steger and Warming FVS scheme
    4 - van Leer FVS non-MUSCL method
-   5 - 
-   6 - 
+   5 - Liou FVS scheme (AUSM+)
+   6 - Roe approximate Riemann solver
    7 - 
    8 -  */
 

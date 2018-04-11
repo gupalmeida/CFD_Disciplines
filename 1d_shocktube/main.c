@@ -49,6 +49,9 @@ int main(){
         case 5:
             liouAUSMplus(&solution,&mesh);
             break;
+        case 6:
+            roeMethod(&solution,&mesh);
+            break;
         default:
             centeredScheme(&solution,&mesh);
             break;

@@ -100,9 +100,13 @@ void initSolution(results * solution){
         solution->dissip1[i] = 0.0;
         solution->dissip2[i] = 0.0;
         solution->dissip3[i] = 0.0;
+        solution->E1p[i] = 0.0;
+        solution->E2p[i] = 0.0;
+        solution->E3p[i] = 0.0;
+        solution->E1m[i] = 0.0;
+        solution->E2m[i] = 0.0;
+        solution->E3m[i] = 0.0;
     }
-
-    calcStegerFluxes(solution);
 
     /* initializing the jacobian matrix */
     solution->A[0][0] = 0.0;
@@ -245,50 +249,213 @@ void calcVanLeerFluxes(results * solution){
     return;
 }
 
-void calcLiouFluxes(results * solution){
-    double *H = malloc(imax * sizeof(double));
-    
-    /* defining states at left - point j */
-    double *phi_j = malloc(imax * sizeof(double));
-    double Mj, pj, uj;
-    double aj_tilde, aj_critical;
+void calcLiouFluxes( results * solution ){
 
-    /* defining states at the right - point j+1 */
-    double *phi_jp1 = malloc(imax * sizeof(double));
-    double Mjp1, pjp1, a_critical_jp1, ujp1;
-    double ajp1_tilde, ajp1_critical;
+    double phiL[3], phiR[3];
+    double hL, hR;
+    double rhoL, rhoR;
 
-    /* defining auxiliary splitting variables */
-    double Mjplus, Mjp1minus, Mbeta;
-    double pjplus, pjp1minus, pAlpha;
-    double a;
+    double aL, aR;
+	double aCriticalL, aCriticalR;
+    double ajph;
 
-    for (int j = 0; j < imax; j++){
-        uj = solution->vel[j];
-        ujp1 = solution->vel[j+1];
-        pj = solution->press[j];
-        pjp1 = solution->press[j+1];
-        H[j] = (solution->Q3[j] + solution->press[j])
-               /solution->Q1[j];
+    double uL, uR;
+    double pjph;
+    double pL, pLplus, pR, pRminus;
+    double pAlphaPlus, pAlphaMinus;
 
-        aj_critical = sqrt((2.0*(gamma-1.0)/(gamma+1.0))
-                * H[j]);
-        ajp1_critical = sqrt((2.0*(gamma-1.0)/(gamma+1.0))
-                * H[j+1]);
-        aj_tilde = aj_critical
-                 * min(1.0,aj_critical/fabs(uj));
-        ajp1_tilde = ajp1_critical
-                   * min(1.0,ajp1_critical/fabs(ujp1));
+    double ML, MR;
+    double MLplus, MRminus;
+    double MbetaPlus, MbetaMinus;
+    double mach;
+    //double machPlus, machMinus;
 
-        a = min(aj_tilde,ajp1_tilde);
+    double alpha = 3.0/16.0;
+    double beta = 1.0/8.0;
+
+    for (int j = 1; j < imax-2; j++){
+        uL = solution->vel[j];
+        uR = solution->vel[j+1];
+        pL = solution->press[j];
+        pR = solution->press[j+1];
+        rhoL = solution->Q1[j];
+        rhoR = solution->Q1[j+1];
+        hL = (solution->Q3[j]+solution->press[j])/solution->Q1[j];
+        hR = (solution->Q3[j+1]+solution->press[j+1])/solution->Q1[j+1];
+
+        /* computing phiL and phiR */
+        phiL[0] = solution->Q1[j];
+        phiL[1] = solution->Q2[j];
+        phiL[2] = solution->Q3[j] + pL;
+
+        phiR[0] = solution->Q1[j+1];
+        phiR[1] = solution->Q2[j+1];
+        phiR[2] = solution->Q3[j+1] + pR;
+
+        /* computing the sound speed at interface j+1/2 */
+        aCriticalL = sqrt( (2.0*(gamma-1.0)/(gamma+1.0))*hL );
+        aCriticalR = sqrt( (2.0*(gamma-1.0)/(gamma+1.0))*hR );
+
+        switch (soundSpeedType){
+            case 1:
+                aL = aCriticalL * min( 1.0, (aCriticalL/fabs(uL)) );
+                aR = aCriticalR * min( 1.0, (aCriticalR/fabs(uR)) );
+                break;
+            case 2:
+                aL = sqrt( gamma* (pL/rhoL) );
+                aR = sqrt( gamma* (pR/rhoR) );
+                break;
+            default:
+                aL = aCriticalL * min( 1.0, (aCriticalL/fabs(uL)) );
+                aR = aCriticalR * min( 1.0, (aCriticalR/fabs(uR)) );
+                break;
+        }
+
+        switch (interfaceSoundSpeed){
+            case 1:
+                ajph = min( aL,aR );
+                break;
+            case 2:
+                ajph = 0.5*( aL + aR );
+                break;
+            case 3:
+                ajph = sqrt( aL * aR );
+                break;
+            case 4:
+                //reserved for roe averages
+                break;
+            default:
+                ajph = min( aL,aR );
+                break;
+        }
+
+        /* computing (M,p)j+1/2 */
+        ML = fabs( uL ) / ajph;
+        MR = fabs( uR ) / ajph;
+
+        MbetaPlus = 0.25*(ML + 1.0)*(ML + 1.0)
+               + beta*(ML*ML - 1.0)*(ML*ML - 1.0);
+        MbetaMinus = -0.25*(MR - 1.0)*(MR - 1.0)
+               - beta*(MR*MR - 1.0)*(MR*MR - 1.0);
+
+        pAlphaPlus = 0.25*(ML + 1.0)*(ML + 1.0)*(2.0 - ML)
+               + alpha*ML*(ML*ML - 1.0)*(ML*ML - 1.0);
+        pAlphaMinus = 0.25*(MR - 1.0)*(MR - 1.0)*(2.0 + MR)
+               - alpha*MR*(MR*MR - 1.0)*(MR*MR - 1.0);
+
+        if ( fabs(ML) >= 1.0 ){
+            MLplus = 0.5*( ML + fabs(ML) );
+            pLplus = 0.5*( 1.0 + (ML / fabs(ML)) );
+        }
+        else{
+            MLplus = MbetaPlus;
+            pLplus = pAlphaPlus;
+        }
+
+        if ( fabs(MR) >= 1.0 ){
+            MRminus = 0.5*( MR - fabs(MR) );
+            pRminus = 0.5*( 1.0 - (MR / fabs(MR)) );
+        }
+        else{
+            MRminus = MbetaMinus;
+            pRminus = pAlphaMinus;
+        }
+
+        mach = MLplus + MRminus;
+        //machPlus = 0.5*( mach + fabs(mach) );
+        //machMinus = 0.5*( mach - fabs(mach) );
+        pjph = pLplus*pL + pRminus*pR;
+        
+        /* computing the fluxes at j+1/2 */
+        solution->E1p[j] = 0.5 * ajph * mach * (phiL[0] + phiR[0])
+           - 0.5 * ajph * fabs( mach )*( phiR[0] - phiL[0] );
+        solution->E2p[j] = 0.5 * ajph * mach * (phiL[1] + phiR[1])
+           - 0.5 * ajph * fabs( mach )*( phiR[1] - phiL[1] ) + pjph;
+        solution->E3p[j] = 0.5 * ajph * mach * (phiL[2] + phiR[2])
+           - 0.5 * ajph * fabs( mach )*( phiR[2] - phiL[2] );
 
     }
 
-    free(H);
-    free(phi_j);
-    free(phi_jp1);
+	return;
+}
 
-    return;
+void calcRoeFluxes( results * solution ){
+
+    double uL, uR;
+    double pL, pR;
+    double rhoL, rhoR;
+    double hL, hR;
+    double uRoe, rhoRoe, hRoe, aRoe;
+
+    double lbd1, lbd2, lbd3;
+    double r1[3], r2[3], r3[3];
+    double deltaQ[3];
+    double dp, du, drho;
+    double alpha1, alpha2, alpha3;
+
+    for (int j = 1; j < imax-2; j++){
+        uL = solution->vel[j];
+        uR = solution->vel[j+1];
+        pL = solution->press[j];
+        pR = solution->press[j+1];
+        rhoL = solution->rho[j];
+        rhoR = solution->rho[j+1];
+        hL = (solution->Q3[j] + solution->press[j])/solution->Q1[j];
+        hR = (solution->Q3[j+1] + solution->press[j+1])/solution->Q1[j+1];
+        du = uR - uL;
+        dp = pR - pL;
+        drho = rhoR - rhoL;
+
+        /* computing roe averaged variables */
+        rhoRoe = sqrt( rhoL * rhoR );
+        uRoe = (sqrt( rhoL ) * uL + sqrt( rhoR ) * uR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        hRoe = (sqrt( rhoL ) * hL + sqrt( rhoR ) * hR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        aRoe = sqrt( (gamma-1.0)*(hRoe - 0.5 * uRoe * uRoe) );
+
+        /* computing the lambda eigenvalues */
+        lbd1 = uRoe - aRoe;
+        lbd2 = uRoe;
+        lbd3 = uRoe + aRoe;
+
+        /* computing the rk eigenvectors */
+        r1[0] = 1.0;
+        r1[1] = lbd1;
+        r1[2] = hRoe - uRoe*aRoe;
+        r2[0] = 1.0;
+        r2[1] = lbd2;
+        r2[2] = 0.5*uRoe*uRoe;
+        r3[0] = 1.0;
+        r3[1] = lbd3;
+        r3[2] = hRoe + uRoe*aRoe;
+
+        /* computing characteristic properties */
+        //alpha1 = du - (1.0/(rhoRoe * aRoe))*dp;
+        //alpha2 = drho - (1.0/(aRoe * aRoe))*dp;
+        //alpha3 = du + (1.0/(rhoRoe * aRoe))*dp;
+        alpha1 = 0.5 * (dp - rhoRoe * aRoe * du) / (aRoe*aRoe);
+        alpha2 = - (dp - drho * aRoe * aRoe) / (aRoe*aRoe);
+        alpha3 = 0.5 * (dp + rhoRoe * aRoe * du) / (aRoe*aRoe);
+
+        /* computing step in Q */
+        deltaQ[0] = fabs( lbd1 ) * alpha1 * r1[0]
+                  + fabs( lbd2 ) * alpha2 * r2[0]
+                  + fabs( lbd3 ) * alpha3 * r3[0];
+        deltaQ[1] = fabs( lbd1 ) * alpha1 * r1[1]
+                  + fabs( lbd2 ) * alpha2 * r2[1]
+                  + fabs( lbd3 ) * alpha3 * r3[1];
+        deltaQ[2] = fabs( lbd1 ) * alpha1 * r1[2]
+                  + fabs( lbd2 ) * alpha2 * r2[2]
+                  + fabs( lbd3 ) * alpha3 * r3[2];
+
+        /* computing the fluxes */
+        solution->E1p[j] = 0.5 * ( solution->E1[j] + solution->E1[j+1] - deltaQ[0]);
+        solution->E2p[j] = 0.5 * ( solution->E2[j] + solution->E2[j+1] - deltaQ[1]);
+        solution->E3p[j] = 0.5 * ( solution->E3[j] + solution->E3[j+1] - deltaQ[2]);
+
+    }
+
 }
 
 void calcJacobian(double q1, double q2, double q3, results * solution){
@@ -324,18 +491,18 @@ void calcDissipation(results * solution, double lambda){
     switch (dissipModel){
         case 0:
             for (int j = 2; j < imax-2; j++){
-                solution->dissip1[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
-                solution->dissip2[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
-                solution->dissip3[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
+                solution->dissip1[j] = (mu/8.0)*(1.0/lambda)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
+                solution->dissip2[j] = (mu/8.0)*(1.0/lambda)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
+                solution->dissip3[j] = (mu/8.0)*(1.0/lambda)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
             }
             break;
 
         case 1:
 
             for (int j = 2; j < imax-2; j++){
-                solution->dissip1[j] = -(alpha/8.0)*(1.0/lambda)*(solution->Q1[j+2] - 4.0*solution->Q1[j+1] + 6.0*solution->Q1[j] - 4.0*solution->Q1[j-1] + solution->Q1[j-2]);
-                solution->dissip2[j] = -(alpha/8.0)*(1.0/lambda)*(solution->Q2[j+2] - 4.0*solution->Q2[j+1] + 6.0*solution->Q2[j] - 4.0*solution->Q2[j-1] + solution->Q2[j-2]);
-                solution->dissip3[j] = -(alpha/8.0)*(1.0/lambda)*(solution->Q3[j+2] - 4.0*solution->Q3[j+1] + 6.0*solution->Q3[j] - 4.0*solution->Q3[j-1] + solution->Q3[j-2]);
+                solution->dissip1[j] = -(mu/8.0)*(1.0/lambda)*(solution->Q1[j+2] - 4.0*solution->Q1[j+1] + 6.0*solution->Q1[j] - 4.0*solution->Q1[j-1] + solution->Q1[j-2]);
+                solution->dissip2[j] = -(mu/8.0)*(1.0/lambda)*(solution->Q2[j+2] - 4.0*solution->Q2[j+1] + 6.0*solution->Q2[j] - 4.0*solution->Q2[j-1] + solution->Q2[j-2]);
+                solution->dissip3[j] = -(mu/8.0)*(1.0/lambda)*(solution->Q3[j+2] - 4.0*solution->Q3[j+1] + 6.0*solution->Q3[j] - 4.0*solution->Q3[j-1] + solution->Q3[j-2]);
             }
 
             break;
@@ -380,9 +547,9 @@ void calcDissipation(results * solution, double lambda){
 
         default:
             for (int j = 2; j < imax-2; j++){
-                solution->dissip1[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
-                solution->dissip2[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
-                solution->dissip3[j] = (alpha/8.0)*(1.0/lambda)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
+                solution->dissip1[j] = (mu/8.0)*(1.0/lambda)*(solution->Q1[j+1] - 2.0*solution->Q1[j] + solution->Q1[j-1]);
+                solution->dissip2[j] = (mu/8.0)*(1.0/lambda)*(solution->Q2[j+1] - 2.0*solution->Q2[j] + solution->Q2[j-1]);
+                solution->dissip3[j] = (mu/8.0)*(1.0/lambda)*(solution->Q3[j+1] - 2.0*solution->Q3[j] + solution->Q3[j-1]);
             }
             break;
     }
