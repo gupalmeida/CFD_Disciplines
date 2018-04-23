@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 #include "input.h"
 #include "mesh.h"
@@ -547,6 +548,71 @@ void roeMethod(results * solution, grid * mesh){
 
 }
 
+/* harten TVD scheme */
+void hartenTVD(results * solution, grid * mesh){
+    /* HARTEN TVD scheme
+    *  using explicit Euler as time marching method.
+    *  ==============================================
+    *  Qjnp1 = Qjn -
+    *  ============================================== */
+    
+    double *Q1np1 = malloc(imax * sizeof(double));
+    double *Q2np1 = malloc(imax * sizeof(double));
+    double *Q3np1 = malloc(imax * sizeof(double));
+    int it = 0;
+    double dx = mesh->x[1] - mesh->x[0];
+    double a = sqrt(gamma);
+    double dt = (dx*cfl)/a;
+    double t = 0.0;
+    double lambda = dt/dx;
+
+    printf("\n\n===========================\n");
+    printf("    Harten\'s TVD scheme      \n");
+    printf("===========================\n");
+    
+    while (t <= (double) tmax && it < (int) itmax){
+        /* calculates the flux vector */
+        calcFluxes(solution);
+        calcHartenFluxes(solution, lambda);
+
+        /* calculates dissipation for the current solution Q */
+        //calcDissipation(solution, lambda);
+
+        /* marching the solution */
+        for (int j = 2; j < imax-2; j++){
+            Q1np1[j] = solution->Q1[j]
+                - lambda*(solution->E1p[j] - solution->E1p[j-1]);
+            Q2np1[j] = solution->Q2[j]
+                - lambda*(solution->E2p[j] - solution->E2p[j-1]);
+            Q3np1[j] = solution->Q3[j]
+                - lambda*(solution->E3p[j] - solution->E3p[j-1]);
+        }
+
+        for (int j = 2; j < imax-2; j++){
+            solution->Q1[j] = Q1np1[j];
+            solution->Q2[j] = Q2np1[j];
+            solution->Q3[j] = Q3np1[j];
+        }
+
+        calcPrimitives(solution);
+        t = t + dt;
+        it++;
+        
+        if ( (it%printAt == 0 ) || (fmod(tmax,t) >= 1.0)){
+            printf("Iteration: %d, simulation time: %lf\n",it,t);
+        }
+    }
+
+    /* deallocating variables */
+    free(Q1np1);
+    free(Q2np1);
+    free(Q3np1);
+
+    printf("\n\n");
+
+}
+
+
 /* exact solution */
 void exactSolution (results * solution, grid * mesh){
 
@@ -676,6 +742,10 @@ void exactSolution (results * solution, grid * mesh){
 			//solution->s[i] = solution->press[i] / ( pow( solution->rho[i], GAMMA) );
 		}
 	}
+
+    //free( solution->press );
+    //free( solution->vel );
+    //free( solution->rho );
 
 	return;
 }

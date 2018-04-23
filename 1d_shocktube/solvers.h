@@ -8,6 +8,7 @@ void stegerWarming(results *, grid *);
 void vanLeerNonMUSCL(results *, grid *);
 void liouAUSMplus(results *, grid *);
 void roeMethod(results *, grid *);
+void hartenTVD(results *, grid *);
 void exactSolution(results *, grid *);
 
 #endif

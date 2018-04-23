@@ -1,41 +1,44 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-// Output file name
+/* Output file name */
 #define filename "output.dat"
 
-// Inputs
-#define p4 20.0
+/* Inputs */
+#define p4 50.0
 #define p1 1.0
 #define tol 1.0e-5
 
-// Spatial dicretization parameters
+/* Spatial dicretization parameters */
 #define l 5.0
 #define imax 1001
+//#define imax 501
 
-// Time discretization parameters
+/* Time discretization parameters */
 #define cfl 0.1
 #define tmax 1.0
 #define itmax 200000
 #define printAt 200
 
-// Initial states
+/* Initial states */
 #define U0 0.0
 #define T0 288.15
 
-// Fluid constants
+/* Fluid constants */
 #define R 287.0
 #define cp 1004.5
 #define cv 717.5
 #define gamma 1.4
 
-// Method selection
-#define method 6
-#define order 1
+/* Method selection */
+#define method 7
+#define order 2
 #define mu 0.4
 #define dissipModel 0
 #define soundSpeedType 1
 #define interfaceSoundSpeed 1
+
+#endif
 
 /* The order parameter sets the spatial discretization
    order for the vector flux splitting schemes
@@ -80,6 +83,3 @@
    6 - Roe approximate Riemann solver
    7 - 
    8 -  */
-
-
-#endif

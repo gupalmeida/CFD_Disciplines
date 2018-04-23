@@ -7,7 +7,7 @@
 #include "mesh.h"
 
 void allocSolution(results * solution){
-    solution->press = malloc((double) imax * sizeof(double));
+    solution->press = malloc(imax * sizeof(double));
     solution->vel = malloc(imax * sizeof(double));
     solution->rho = malloc(imax * sizeof(double));
     solution->energy = malloc(imax * sizeof(double));
@@ -458,6 +458,220 @@ void calcRoeFluxes( results * solution ){
 
 }
 
+void calcHartenFluxes( results * solution, double lambda ){
+
+    double uL, uR;
+    //double pL, pR;
+    double rhoL, rhoR;
+    double eL, eR;
+    double hL, hR;
+    double uRoe, hRoe, aRoe;
+
+    double lbd1, lbd2, lbd3;
+    double r1[3], r2[3], r3[3];
+    double deltaQ[3];
+    //double dp, du;
+    double drho, de, dqm;
+    double alpha1, alpha2, alpha3;
+    double C1, C2;
+    double g[3][imax], gBar[3][imax];
+    double nu[3], ksi[3], s[3], eps[3], gm[3];
+
+    eps[0] = 0.05;
+    eps[1] = 0.0;
+    eps[2] = 0.0;
+
+    for (int j = 1; j < imax-2; j++){
+        uL = solution->vel[j];
+        uR = solution->vel[j+1];
+        //pL = solution->press[j];
+        //pR = solution->press[j+1];
+        rhoL = solution->rho[j];
+        rhoR = solution->rho[j+1];
+        eL = solution->Q3[j];
+        eR = solution->Q3[j+1];
+        hL = (solution->Q3[j] + solution->press[j])/solution->Q1[j];
+        hR = (solution->Q3[j+1] + solution->press[j+1])/solution->Q1[j+1];
+        //du = uR - uL;
+        //dp = pR - pL;
+        drho = rhoR - rhoL;
+        de = eR - eL;
+        dqm = solution->Q2[j+1] - solution->Q2[j];
+
+        /* computing roe averaged variables */
+        uRoe = (sqrt( rhoL ) * uL + sqrt( rhoR ) * uR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        hRoe = (sqrt( rhoL ) * hL + sqrt( rhoR ) * hR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        aRoe = sqrt( (gamma-1.0)*(hRoe - 0.5 * uRoe * uRoe) );
+
+        /* computing the lambda eigenvalues */
+        lbd1 = uRoe - aRoe;
+        lbd2 = uRoe;
+        lbd3 = uRoe + aRoe;
+
+        /* computing characteristic properties */
+        C1 = ((gamma-1.0)/(aRoe*aRoe))*(de
+                + 0.5 * uRoe * uRoe * drho
+                - uRoe * dqm);
+        C2 = (1.0/aRoe) * (dqm - uRoe * drho);
+
+        alpha1 = 0.5 * ( C1 - C2 );
+        alpha2 = drho - C1;
+        alpha3 = 0.5 * ( C1 + C2 );
+
+        /* computing step in Q */
+        
+        nu[0] = lambda * lbd1;
+        nu[1] = lambda * lbd2;
+        nu[2] = lambda * lbd3;
+
+        switch (order){
+            case 1:
+                gBar[0][j] = 0.0;
+                gBar[1][j] = 0.0;
+                gBar[2][j] = 0.0;
+                break;
+            case 2:
+                ksi[0] = ksiHarten(nu[0],eps[0]);
+                ksi[1] = ksiHarten(nu[1],eps[1]);
+                ksi[2] = ksiHarten(nu[2],eps[2]);
+
+                gBar[0][j] = 0.5 * ( ksi[0] - nu[0]*nu[0] ) * alpha1;
+                gBar[1][j] = 0.5 * ( ksi[1] - nu[1]*nu[1] ) * alpha2;
+                gBar[2][j] = 0.5 * ( ksi[2] - nu[2]*nu[2] ) * alpha3;
+                break;
+            default:
+                gBar[0][j] = 0.0;
+                gBar[1][j] = 0.0;
+                gBar[2][j] = 0.0;
+                break;
+        }
+    }
+
+    for (int j = 1; j < imax-2; j++){
+        switch (order){
+            case 1:
+                g[0][j] = 0.0;
+                g[1][j] = 0.0;
+                g[2][j] = 0.0;
+                break;
+            case 2:
+                s[0] = copysign( 1.0, gBar[0][j] );
+                s[1] = copysign( 1.0, gBar[1][j] );
+                s[2] = copysign( 1.0, gBar[2][j] );
+
+                g[0][j] =s[0]*max( 0.0, min(fabs(gBar[0][j]),s[0]*gBar[0][j-1]) );
+                g[1][j] =s[1]*max( 0.0, min(fabs(gBar[1][j]),s[1]*gBar[1][j-1]) );
+                g[2][j] =s[2]*max( 0.0, min(fabs(gBar[2][j]),s[2]*gBar[2][j-1]) );
+                break;
+            default:
+                g[0][j] = 0.0;
+                g[1][j] = 0.0;
+                g[2][j] = 0.0;
+                break;
+        }
+    }
+
+    for (int j = 1; j < imax-2; j++){
+        uL = solution->vel[j];
+        uR = solution->vel[j+1];
+        //pL = solution->press[j];
+        //pR = solution->press[j+1];
+        rhoL = solution->rho[j];
+        rhoR = solution->rho[j+1];
+        eL = solution->Q3[j];
+        eR = solution->Q3[j+1];
+        hL = (solution->Q3[j] + solution->press[j])/solution->Q1[j];
+        hR = (solution->Q3[j+1] + solution->press[j+1])/solution->Q1[j+1];
+        //du = uR - uL;
+        //dp = pR - pL;
+        drho = rhoR - rhoL;
+        de = eR - eL;
+        dqm = solution->Q2[j+1] - solution->Q2[j];
+
+        /* computing roe averaged variables */
+        //rhoRoe = sqrt( rhoL * rhoR );
+        uRoe = (sqrt( rhoL ) * uL + sqrt( rhoR ) * uR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        hRoe = (sqrt( rhoL ) * hL + sqrt( rhoR ) * hR)
+               / ( sqrt( rhoL ) + sqrt( rhoR ) );
+        aRoe = sqrt( (gamma-1.0)*(hRoe - 0.5 * uRoe * uRoe) );
+
+        /* computing the lambda eigenvalues */
+        lbd1 = uRoe - aRoe;
+        lbd2 = uRoe;
+        lbd3 = uRoe + aRoe;
+
+        /* computing the rk eigenvectors */
+        r1[0] = 1.0;
+        r1[1] = lbd1;
+        r1[2] = hRoe - uRoe*aRoe;
+        r2[0] = 1.0;
+        r2[1] = lbd2;
+        r2[2] = 0.5*uRoe*uRoe;
+        r3[0] = 1.0;
+        r3[1] = lbd3;
+        r3[2] = hRoe + uRoe*aRoe;
+
+        /* computing characteristic properties */
+        C1 = ((gamma-1.0)/(aRoe*aRoe))*(de
+                + 0.5 * uRoe * uRoe * drho
+                - uRoe * dqm);
+        C2 = (1.0/aRoe) * (dqm - uRoe * drho);
+
+        alpha1 = 0.5 * ( C1 - C2 );
+        alpha2 = drho - C1;
+        alpha3 = 0.5 * ( C1 + C2 );
+
+        /* computing gamma k */
+        if (fabs( alpha1 ) > eps[0]){
+            gm[0] = (g[0][j+1] - g[0][j]) / alpha1;
+        }
+        else {
+            gm[0] = 0.0;
+        }
+        if (fabs( alpha2 ) > eps[1]){
+            gm[1] = (g[1][j+1] - g[1][j]) / alpha2;
+        }
+        else {
+            gm[1] = 0.0;
+        }
+        if (fabs( alpha3 ) > eps[2]){
+            gm[2] = (g[2][j+1] - g[2][j]) / alpha3;
+        }
+        else {
+            gm[2] = 0.0;
+        }
+
+        /* computing step in Q */
+        nu[0] = lambda * lbd1;
+        nu[1] = lambda * lbd2;
+        nu[2] = lambda * lbd3;
+
+        ksi[0] = ksiHarten( (nu[0] + gm[0]) , eps[0] );
+        ksi[1] = ksiHarten( (nu[1] + gm[1]) , eps[1] );
+        ksi[2] = ksiHarten( (nu[2] + gm[2]) , eps[2] );
+
+        deltaQ[0] = r1[0] * (g[0][j] + g[0][j+1] - ksi[0] * alpha1)
+                  + r2[0] * (g[1][j] + g[1][j+1] - ksi[1] * alpha2)
+                  + r3[0] * (g[2][j] + g[2][j+1] - ksi[2] * alpha3);
+        deltaQ[1] = r1[1] * (g[0][j] + g[0][j+1] - ksi[0] * alpha1)
+                  + r2[1] * (g[1][j] + g[1][j+1] - ksi[1] * alpha2)
+                  + r3[1] * (g[2][j] + g[2][j+1] - ksi[2] * alpha3);
+        deltaQ[2] = r1[2] * (g[0][j] + g[0][j+1] - ksi[0] * alpha1)
+                  + r2[2] * (g[1][j] + g[1][j+1] - ksi[1] * alpha2)
+                  + r3[2] * (g[2][j] + g[2][j+1] - ksi[2] * alpha3);
+
+        /* computing the fluxes */
+        solution->E1p[j] = 0.5 * ( solution->E1[j] + solution->E1[j+1] + (1.0/lambda)*deltaQ[0]);
+        solution->E2p[j] = 0.5 * ( solution->E2[j] + solution->E2[j+1] + (1.0/lambda)*deltaQ[1]);
+        solution->E3p[j] = 0.5 * ( solution->E3[j] + solution->E3[j+1] + (1.0/lambda)*deltaQ[2]);
+
+    }
+
+}
+
 void calcJacobian(double q1, double q2, double q3, results * solution){
     double gm = gamma;
 
@@ -575,4 +789,17 @@ double min(double a, double b){
     else{
         return b;
     }
+}
+
+double ksiHarten( double a, double eps ){
+    double ksi;
+
+    if ( fabs( a ) < eps ){
+        ksi = 0.5 * ( ((a*a)/eps) + eps );
+    }
+    else {
+        ksi = fabs( a );
+    }
+
+    return ksi;
 }

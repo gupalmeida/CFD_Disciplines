@@ -52,6 +52,9 @@ int main(){
         case 6:
             roeMethod(&solution,&mesh);
             break;
+        case 7:
+            hartenTVD(&solution,&mesh);
+            break;
         default:
             centeredScheme(&solution,&mesh);
             break;
