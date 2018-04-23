@@ -5,7 +5,7 @@
 #define filename "output.dat"
 
 /* Inputs */
-#define p4 50.0
+#define p4 90.0
 #define p1 1.0
 #define tol 1.0e-5
 
@@ -81,5 +81,4 @@
    4 - van Leer FVS non-MUSCL method
    5 - Liou FVS scheme (AUSM+)
    6 - Roe approximate Riemann solver
-   7 - 
-   8 -  */
+   7 - Harten TVD method */
