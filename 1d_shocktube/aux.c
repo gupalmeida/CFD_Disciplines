@@ -557,13 +557,35 @@ void calcHartenFluxes( results * solution, double lambda ){
                 g[2][j] = 0.0;
                 break;
             case 2:
-                s[0] = copysign( 1.0, gBar[0][j] );
-                s[1] = copysign( 1.0, gBar[1][j] );
-                s[2] = copysign( 1.0, gBar[2][j] );
+                switch (limiter){
+                    case 0:
+                        s[0] = copysign( 1.0, gBar[0][j] );
+                        s[1] = copysign( 1.0, gBar[1][j] );
+                        s[2] = copysign( 1.0, gBar[2][j] );
 
-                g[0][j] =s[0]*max( 0.0, min(fabs(gBar[0][j]),s[0]*gBar[0][j-1]) );
-                g[1][j] =s[1]*max( 0.0, min(fabs(gBar[1][j]),s[1]*gBar[1][j-1]) );
-                g[2][j] =s[2]*max( 0.0, min(fabs(gBar[2][j]),s[2]*gBar[2][j-1]) );
+                        g[0][j] = gBar[0][j];
+                        g[1][j] = gBar[1][j];
+                        g[2][j] = gBar[2][j];
+                        break;
+                    case 1:
+                        s[0] = copysign( 1.0, gBar[0][j] );
+                        s[1] = copysign( 1.0, gBar[1][j] );
+                        s[2] = copysign( 1.0, gBar[2][j] );
+
+                        g[0][j] =s[0]*max( 0.0, min(fabs(gBar[0][j]),s[0]*gBar[0][j-1]) );
+                        g[1][j] =s[1]*max( 0.0, min(fabs(gBar[1][j]),s[1]*gBar[1][j-1]) );
+                        g[2][j] =s[2]*max( 0.0, min(fabs(gBar[2][j]),s[2]*gBar[2][j-1]) );
+                        break;
+                    default:
+                        s[0] = copysign( 1.0, gBar[0][j] );
+                        s[1] = copysign( 1.0, gBar[1][j] );
+                        s[2] = copysign( 1.0, gBar[2][j] );
+
+                        g[0][j] =s[0]*max( 0.0, min(fabs(gBar[0][j]),s[0]*gBar[0][j-1]) );
+                        g[1][j] =s[1]*max( 0.0, min(fabs(gBar[1][j]),s[1]*gBar[1][j-1]) );
+                        g[2][j] =s[2]*max( 0.0, min(fabs(gBar[2][j]),s[2]*gBar[2][j-1]) );
+                        break;
+                }
                 break;
             default:
                 g[0][j] = 0.0;

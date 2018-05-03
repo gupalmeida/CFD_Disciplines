@@ -34,9 +34,10 @@
 #define method 7
 #define order 2
 #define mu 0.4
-#define dissipModel 0
+#define dissipModel 2
 #define soundSpeedType 1
 #define interfaceSoundSpeed 1
+#define limiter 1
 
 #endif
 
