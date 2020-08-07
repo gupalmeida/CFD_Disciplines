@@ -1,10 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "input.h"
 #include "aux.h"
-#include "mesh.h"
 
 void allocSolution(results * solution){
     solution->press = malloc(imax * sizeof(double));

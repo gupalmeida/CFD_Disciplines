@@ -1,6 +1,13 @@
 #ifndef AUX_H
 #define AUX_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "input.h"
+#include "mesh.h"
+
 typedef struct results{
     double *press;
     double *vel;

@@ -1,11 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <time.h>
-
-#include "input.h"
-#include "mesh.h"
-#include "aux.h"
 #include "solvers.h"
 
 /* beam and warming explicit centered scheme */

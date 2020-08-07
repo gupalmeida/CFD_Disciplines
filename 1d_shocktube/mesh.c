@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "mesh.h"
-#include "input.h"
 
 void meshAlloc(grid * mesh){
     mesh->x = malloc(imax * sizeof(double));
