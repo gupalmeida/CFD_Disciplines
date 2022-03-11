@@ -19,12 +19,10 @@ All the projects related to this discipline challenges for solving the benchmark
 ### Benchmark Problem - 1-D Shock tube
 The high order and high resolution numerical methods implemented in the source code are investigated for the benchmark problem of the shock tube in one dimension. The reason for a simple implementation is such to provide further understanding of the numerical methods themselves rather than focusing on a more complex problem. More details on the problem description as well as some useful tools can be found at [NASA webpage](https://www.grc.nasa.gov/WWW/wind/valid/stube/stube.html).
 
----
-## Scientific C++
-The folder named Scientific C++ contains a set of files comprising a numerical library writen in C++ for educational and learning purposes. For more information, please refer to [1](#whiteley).
-
 
 ---
 # REFERENCES
 
+<!--
 1. <a name="whiteley"></a> Joe Pitt-Francis and Jonathan Whiteley. 2017. *Guide to Scientific Computing in C++*, 2nd Edition. Springer.
+-->
