@@ -1,6 +1,8 @@
 # CFD Graduate Program
 This repository contains C/C++ code related to the CFD projects of some of the disciplines offered in the Graduate program at ITA.
 
+Lecturer: João Luiz F. Azevedo, Ph.D.
+
 - CC-297 - Fundamentals of Computational Fluid Mechanics
 - CC-298 - Numerical Methods in Fluid Mechanics
 - CC-299 - High Order Numerical Methods
