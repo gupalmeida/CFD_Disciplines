@@ -24,7 +24,7 @@ The high order and high resolution numerical methods implemented in the source c
 
 ---
 # REFERENCES
-
 <!--
 1. <a name="whiteley"></a> Joe Pitt-Francis and Jonathan Whiteley. 2017. *Guide to Scientific Computing in C++*, 2nd Edition. Springer.
 -->
+1. <a name="lomax"></a> Lomax, H., Pulliam, T.H., and Zingg, D.W., *Fundamentals of Computational Fluid Dynamics*, Springer, New York, 2001.
