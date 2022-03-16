@@ -1,14 +1,31 @@
 #include <iostream>
 
-#include "Node.H"
+#include "LinSys.H"
 
 int main()
 {
-    Node n;
+    Matrix m(5,5);
+    Vector b(5);
 
-    n.setXCoord( 12.0 );
+    b.ones();
+    b(0) = 3.0;
+    b(4) = 3.0;
 
-    std::cout << "Value of x is: " << n.getXCoord() << "\n";
+    m.ones();
+    m.setUpperDiag( 2.0 );
+    m.setLowerDiag( 3.0 );
+    m.setDiag( 5.0 );
+
+    print( b );
+    std::cout << "\n\n";
+    print( m );
+
+    LinSys s(m,b);
+    Vector sol(5);
+
+    sol = s.Solve();
+
+    print(sol);
 
     return 0;
 }

@@ -5,6 +5,8 @@ project( cc297 VERSION 1.0 )
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # Add libraries directory
 add_subdirectory( lib )
 add_subdirectory( src )

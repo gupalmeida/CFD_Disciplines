@@ -1,1 +1,9 @@
-add_library( lib Node.C )
+add_library(
+    lib
+    Macros.H
+    Node.H
+    Mesh.C
+    Matrix.C
+    Vector.C
+    LinSys.C
+)
