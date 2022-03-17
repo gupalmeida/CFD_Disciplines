@@ -5,6 +5,7 @@ cmake_install.cmake
 build/
 bin/
 cmakeAndCompile
+compile
 *.swp
 *.o
 *.dat

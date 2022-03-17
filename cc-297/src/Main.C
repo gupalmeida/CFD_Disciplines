@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "LinSys.H"
 
@@ -23,7 +24,16 @@ int main()
     LinSys s(m,b);
     Vector sol(5);
 
+    // measuring time
+    auto start = std::chrono::steady_clock::now();
+
     sol = s.Solve();
+
+    auto end = std::chrono::steady_clock::now();
+    std::cout
+        << "Elapsed Solver Time [s]: "
+        << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+        << "\n";
 
     print(sol);
 
