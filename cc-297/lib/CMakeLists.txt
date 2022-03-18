@@ -2,7 +2,6 @@ add_library(
     lib
     Aux.H
     Node.H
-    IOobject.C
     Mesh.C
     Matrix.C
     Vector.C

@@ -2,6 +2,7 @@
 #include <chrono>
 
 #include "LinSys.H"
+#include "IOobject.H"
 
 int main()
 {
@@ -30,7 +31,8 @@ int main()
         << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
         << "\n";
 
-    print(sol);
+    IOobject io;
+    io.readSetup( );
 
     return 0;
 }
