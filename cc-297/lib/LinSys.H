@@ -1,6 +1,11 @@
 #ifndef LINSYS_H
 #define LINSYS_H
 
+#include <iostream>
+#include <cmath>
+#include <cassert>
+
+#include "Aux.H"
 #include "Matrix.H"
 #include "Vector.H"
 

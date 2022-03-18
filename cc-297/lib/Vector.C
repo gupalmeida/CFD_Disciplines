@@ -1,6 +1,3 @@
-#include <cmath>
-#include <cassert>
-#include <iostream>
 #include "Vector.H"
 
 // constructor for vector with given size
@@ -55,7 +52,7 @@ void Vector::print() const
     assert( mSize > 0 );
     for (int i = 0; i < mSize; i++)
     {
-        std::cout << mData[i] << '\n';
+        cout << mData[i] << '\n';
     }
 }
 
@@ -64,7 +61,7 @@ void Vector::print( int i ) const
     // verify index is within bounds
     assert( i > -1 );
     assert( i < mSize );
-    std::cout << mData[i] << '\n';
+    cout << mData[i] << '\n';
 }
 
 // reading vector element
@@ -182,6 +179,6 @@ void print( const Vector& v )
     assert( v.mSize > 0 );
     for ( int i = 0; i < v.mSize; i++ )
     {
-        std::cout << v.mData[i] << '\n';
+        cout << v.mData[i] << '\n';
     }
 }

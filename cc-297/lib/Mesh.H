@@ -6,13 +6,13 @@
 #include <vector>
 #include <cassert>
 
-#include "Macros.H"
+#include "Aux.H"
 #include "Node.H"
 
 class Mesh
 {
     private:
-        std::vector<Node> mNodes;
+        vector<Node> mNodes;
 
     public:
         Mesh( double xMin, double xMax, int numNodes );

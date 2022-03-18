@@ -1,6 +1,3 @@
-#include <iostream>
-#include <cmath>
-#include <cassert>
 #include "Matrix.H"
 
 // new matrix constructor
@@ -341,9 +338,9 @@ void print( const Matrix& m )
     {
         for ( int j = 0; j < m.mCols; j++ )
         {
-            std::cout << m.mData[i][j] << '\t';
+            cout << m.mData[i][j] << '\t';
         }
-        std::cout << '\n';
+        cout << '\n';
     }
 }
 
@@ -351,6 +348,6 @@ void print( const double matrixEntry )
 {
     // prints out a single entry of a
     // matrix
-    std::cout << matrixEntry << '\n';
+    cout << matrixEntry << '\n';
 }
 

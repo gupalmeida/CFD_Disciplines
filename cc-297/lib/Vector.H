@@ -1,7 +1,11 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include "Macros.H"
+#include <cmath>
+#include <cassert>
+#include <iostream>
+
+#include "Aux.H"
 
 class Vector
 {

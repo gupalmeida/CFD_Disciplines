@@ -6,6 +6,7 @@
 #include <cassert>
 #include <string>
 
+#include "Aux.H"
 #include "Vector.H"
 #include "Matrix.H"
 #include "LinSys.H"

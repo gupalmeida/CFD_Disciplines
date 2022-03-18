@@ -1,6 +1,11 @@
 #ifndef MATRIX_H
 #define MATRIX_H
-#include "Macros.H"
+
+#include <iostream>
+#include <cmath>
+#include <cassert>
+
+#include "Aux.H"
 #include "Vector.H"
 
 class Matrix

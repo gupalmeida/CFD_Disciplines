@@ -1,7 +1,3 @@
-#include <iostream>
-#include <cmath>
-#include <cassert>
-
 #include "LinSys.H"
 
 
@@ -42,11 +38,11 @@ Vector LinSys::Solve()
     Vector rb = *mpb;
 
     // print statements for debugging purposes
-    //std::cout << " --- \n";
+    //cout << " --- \n";
     //print(rA);
-    //std::cout << "\n";
+    //cout << "\n";
     //print(rb);
-    //std::cout << " --- \n";
+    //cout << " --- \n";
 
     // forward sweep
     for (int k = 0 ; k < mSize-1; k++ )
@@ -62,11 +58,11 @@ Vector LinSys::Solve()
         }
     }
 
-    //std::cout << " --- \n";
+    //cout << " --- \n";
     //print(rA);
-    //std::cout << "\n";
+    //cout << "\n";
     //print(rb);
-    //std::cout << " --- \n";
+    //cout << " --- \n";
 
     // backward substitution
     x(mSize-1) = rb(mSize-1)/rA(mSize-1,mSize-1);
@@ -80,7 +76,7 @@ Vector LinSys::Solve()
         x(i) /= rA(i,i);
     }
 
-    //std::cout << " --- \n";
+    //cout << " --- \n";
     //print(x);
 
     return x;

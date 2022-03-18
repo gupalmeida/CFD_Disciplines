@@ -1,7 +1,8 @@
 add_library(
     lib
-    Macros.H
+    Aux.H
     Node.H
+    IOobject.C
     Mesh.C
     Matrix.C
     Vector.C
