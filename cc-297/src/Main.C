@@ -31,8 +31,9 @@ int main()
         << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
         << "\n";
 
-    IOobject io;
-    io.readSetup( );
+    double imax;
+    imax = readInput<double>( "IMAX", SETUP_FILE );
+    cout << "Value from input file: " << imax << "\n";
 
     return 0;
 }

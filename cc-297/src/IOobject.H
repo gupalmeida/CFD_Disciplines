@@ -3,20 +3,37 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <filesystem>
 #include <cassert>
+#include <string>
 
 #include "Aux.H"
-#include "Vector.H"
-#include "Matrix.H"
 
 using namespace std;
 
-class IOobject
+template<class T>
+T readInput( string varname, string filename )
 {
-    public:
-        void readSetup( );
-};
+    // declaring variable to get as input from varname
+    T var;
+
+    ifstream readFile;
+    readFile.open( filename );
+
+    string meof;
+    bool found = 0;
+    while ( readFile >> meof && !found )
+    {
+        if( meof == varname )
+        {
+            found = 1;
+            readFile.ignore();
+            readFile >> var;
+        }
+    }
+
+    readFile.close();
+
+    return var;
+}
 
 #endif
