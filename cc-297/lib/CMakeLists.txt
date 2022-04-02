@@ -1,8 +1,6 @@
 add_library(
     lib
     Aux.H
-    Node.H
-    Mesh.C
     Matrix.C
     Vector.C
     LinSys.C

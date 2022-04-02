@@ -1,6 +1,9 @@
 #include <iostream>
 #include <chrono>
 
+#include "Matrix.H"
+#include "Vector.H"
+#include "SecondOrderODE.H"
 #include "LinSys.H"
 #include "IOobject.H"
 
@@ -10,8 +13,7 @@ int main()
     Vector b(5);
 
     b(0) = 1.0;
-    b(1) = 1.0;
-    b(2) = 1.0;
+    b(4) = 1.0;
 
     m.setUpperDiag( 1.0 );
     m.setLowerDiag( 1.0 );
@@ -25,6 +27,8 @@ int main()
 
     sol = s.Solve();
 
+    print( sol );
+
     auto end = chrono::steady_clock::now();
     cout
         << "Elapsed Solver Time [s]: "
@@ -32,7 +36,7 @@ int main()
         << "\n";
 
     double imax;
-    imax = readInput<double>( "IMAX", SETUP_FILE );
+    imax = readInput<double>( "JMAX", SETUP_FILE );
     cout << "Value from input file: " << imax << "\n";
 
     return 0;

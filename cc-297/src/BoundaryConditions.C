@@ -18,7 +18,7 @@ void BoundaryConditions::setLhsDirichletBc( double lhsBcValue )
     mLhsBcValue = lhsBcValue;
 }
 
-void BoundaryConditions::setLhsNeumann( double lhsBcValue )
+void BoundaryConditions::setLhsNeumannBc( double lhsBcValue )
 {
     assert( !mLhsBcIsDirichlet );
     mLhsBcIsNeumann = true;
@@ -32,7 +32,7 @@ void BoundaryConditions::setRhsDirichletBc( double rhsBcValue )
     mRhsBcValue = rhsBcValue;
 }
 
-void BoundaryConditions::setRhsNeumann( double rhsBcValue )
+void BoundaryConditions::setRhsNeumannBc( double rhsBcValue )
 {
     assert( !mRhsBcIsDirichlet );
     mRhsBcIsNeumann = true;

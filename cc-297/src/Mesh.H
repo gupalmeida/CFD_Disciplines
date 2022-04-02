@@ -11,6 +11,9 @@
 
 class Mesh
 {
+    public:
+        friend class BvpOde;
+
     private:
         vector<Node> mNodes;
 

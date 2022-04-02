@@ -11,6 +11,10 @@
 
 class SecondOrderODE
 {
+    // Boundary value class is able to access
+    // the coefficients, etc of this equation
+    friend class BvpOde;
+
     private:
         // coefficients on LHS of ODE
         double mCoeffOfUxx;
@@ -22,13 +26,17 @@ class SecondOrderODE
 
         // interval of the domain
         double mXmin;
-        double mXMax;
+        double mXmax;
 
     public:
-        SecondOrderODE( double coeffUxx, double coeffUx,
-                        double coeffU,
-                        double (*rightHandSide)(double),
-                        double xMin, double xMax)
+        SecondOrderODE
+        (
+            double coeffUxx,
+            double coeffUx,
+            double coeffU,
+            double (*rightHandSide)(double),
+            double xMin, double xMax
+        )
         {
             mXmin = xMin;
             mXmax = xMax;
