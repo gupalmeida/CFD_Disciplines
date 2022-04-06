@@ -35,7 +35,8 @@ class SecondOrderODE
             double coeffUx,
             double coeffU,
             double (*rightHandSide)(double),
-            double xMin, double xMax
+            double xMin,
+            double xMax
         )
         {
             mXmin = xMin;

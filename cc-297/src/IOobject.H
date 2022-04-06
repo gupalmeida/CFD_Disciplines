@@ -7,12 +7,16 @@
 #include <string>
 
 #include "Aux.H"
+#include "Vector.H"
+#include "Matrix.H"
 
 using namespace std;
 
 template<class T>
 T readInput( string varname, string filename )
 {
+    // reads variable value from input file
+
     // declaring variable to get as input from varname
     T var;
 
@@ -35,5 +39,18 @@ T readInput( string varname, string filename )
 
     return var;
 }
+
+//void writeSolutionToFile( Vector& v, string fname )
+//{
+//    ofstream outputFile( fname );
+//
+//    int size = len( v );
+//    for ( int i=0; i < v.size(); i++ )
+//    {
+//        outputFile<< v(i) << "\n";
+//    }
+//
+//    outputFile.close();
+//}
 
 #endif

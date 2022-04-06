@@ -1,15 +1,19 @@
 #include "BvpOde.H"
 
 
-BvpOde::BvpOde(SecondOrderOde* pOde, BoundaryConditions* pBcs, int numNodes)
+BvpOde::BvpOde
+(
+    SecondOrderODE* pOde,
+    BoundaryConditions* pBcs,
+    int numNodes
+)
 {
-
     mpOde = pOde;
     mpBCs = pBcs;
 
     mNumOfNodes = numNodes;
 
-    mpMesh = new Mesh( pOde->xMin, pOde->xMax, mNumOfNodes );
+    mpMesh = new Mesh( pOde->mXmin, pOde->mXmax, mNumOfNodes );
     mpSolution = new Vector( mNumOfNodes );
     mpRHS = new Vector( mNumOfNodes );
     mpLinMat = new Matrix( mNumOfNodes, mNumOfNodes );
@@ -37,7 +41,7 @@ void BvpOde::Solve()
     applyBCs();
     mpLinSys = new LinSys( *mpLinMat, *mpRHS );
     *mpSolution = mpLinSys->Solve();
-    print( *mpSolution );
+    writeSolutionToFile( "solution.out" );
 }
 
 void BvpOde::populateMatrix()
@@ -51,7 +55,7 @@ void BvpOde::populateMatrix()
 
         // coefficients using central differencing scheme
         double alpha = 2.0 / ((xp-xm)*(x-xm));
-        double beta = -2.0 / ((xp-x)*(x-xm))
+        double beta = -2.0 / ((xp-x)*(x-xm));
         double gamma = 2.0 / ((xp-xm)*(xp-x));
 
         (*mpLinMat)(i,i-1) = (mpOde->mCoeffOfUxx)*alpha -
@@ -68,7 +72,7 @@ void BvpOde::populateVector()
 {
     for (int i = 1; i < mNumOfNodes-1; i++)
     {
-        double x = mpMesh->Nodes[i].xCoord;
+        double x = mpMesh->mNodes[i].xCoord;
         (*mpRHS)(i) = mpOde->mpRhsFunction(x);
     }
 }
@@ -78,25 +82,25 @@ void BvpOde::applyBCs()
     bool left_bc_applied = false;
     bool right_bc_applied = false;
 
-    if (mpBCs->mpLhsBcIsDirichlet)
+    if (mpBCs->mLhsBcIsDirichlet)
     {
         (*mpLinMat)(0,0) = 1.0;
         (*mpRHS)(0) = mpBCs->mLhsBcValue;
         left_bc_applied = true;
     }
 
-    if (mpBCs->mpRhsBcIsDirichlet)
+    if (mpBCs->mRhsBcIsDirichlet)
     {
         (*mpLinMat)(mNumOfNodes-1,mNumOfNodes-1) = 1.0;
         (*mpRHS)(mNumOfNodes-1) = mpBCs->mRhsBcValue;
         right_bc_applied = true;
     }
 
-    if (mpBCs->mpLhsBcIsNeumann)
+    if (mpBCs->mLhsBcIsNeumann)
     {
         assert( left_bc_applied == false );
 
-        double h = mpMesh->Nodes[1].xCoord - mpMesh.Nodes[0].xCoord;
+        double h = mpMesh->mNodes[1].xCoord - mpMesh->mNodes[0].xCoord;
 
         (*mpLinMat)(0,0) = -1.0/h;
         (*mpLinMat)(0,1) = 1.0/h;
@@ -104,11 +108,11 @@ void BvpOde::applyBCs()
         left_bc_applied = true;
     }
 
-    if (mpBCs->mpRhsBcIsDirichlet)
+    if (mpBCs->mRhsBcIsNeumann)
     {
         assert( right_bc_applied == false );
 
-        double h = mpMesh->Nodes[mNumOfNodes-1].xCoord - mpMesh.Nodes[mNumOfNodes-2].xCoord;
+        double h = mpMesh->mNodes[mNumOfNodes-1].xCoord - mpMesh->mNodes[mNumOfNodes-2].xCoord;
 
         (*mpLinMat)(mNumOfNodes-1,mNumOfNodes-2) = -1.0/h;
         (*mpLinMat)(mNumOfNodes-1,mNumOfNodes-1) = 1.0/h;
@@ -118,4 +122,17 @@ void BvpOde::applyBCs()
 
     assert( left_bc_applied = true );
     assert( right_bc_applied = true );
+}
+
+// friend functions
+void BvpOde::writeSolutionToFile( string fname )
+{
+    ofstream outputFile( fname );
+
+    for ( int i=0; i < mNumOfNodes; i++ )
+    {
+        outputFile<< (*mpSolution)(i) << "\n";
+    }
+
+    outputFile.close();
 }

@@ -5,7 +5,6 @@ class Node
 {
     public:
         double xCoord;
-        double yCoord;
 };
 
 #endif

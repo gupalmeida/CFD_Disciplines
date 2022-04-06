@@ -13,6 +13,7 @@
 #include "Mesh.H"
 #include "SecondOrderODE.H"
 #include "BoundaryConditions.H"
+#include "IOobject.H"
 
 class BvpOde
 {
@@ -49,11 +50,11 @@ class BvpOde
         void applyBCs();
 
     public:
-        BvpOde(SecondOrderOde* pOde, BoundaryConditions* pBcs, int numNodes);
+        BvpOde(SecondOrderODE* pOde, BoundaryConditions* pBcs, int numNodes);
         ~BvpOde();
 
         void Solve();
-        void writeSolutionToFile();
+        void writeSolutionToFile( string fname );
 };
 
 #endif

@@ -10,5 +10,6 @@ compile
 *.swp
 *.o
 *.dat
+*.out
 shocktube
 fdSolver

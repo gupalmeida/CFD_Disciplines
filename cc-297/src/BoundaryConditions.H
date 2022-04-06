@@ -9,6 +9,9 @@
 
 class BoundaryConditions
 {
+    public:
+        friend class BvpOde;
+
     private:
         bool mLhsBcIsDirichlet;
         bool mLhsBcIsNeumann;
