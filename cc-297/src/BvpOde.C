@@ -54,6 +54,7 @@ void BvpOde::populateMatrix()
         double xp = mpMesh->mNodes[i+1].xCoord;
 
         // coefficients using central differencing scheme
+        // alpha * x_{i-1} + beta * x + gamma * x_{i+1}
         double alpha = 2.0 / ((xp-xm)*(x-xm));
         double beta = -2.0 / ((xp-x)*(x-xm));
         double gamma = 2.0 / ((xp-xm)*(xp-x));

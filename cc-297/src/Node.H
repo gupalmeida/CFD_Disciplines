@@ -1,10 +1,10 @@
 #ifndef NODE_H
 #define NODE_H
 
-class Node
+struct Node
 {
-    public:
-        double xCoord;
+    //public:
+    double xCoord;
 };
 
 #endif
