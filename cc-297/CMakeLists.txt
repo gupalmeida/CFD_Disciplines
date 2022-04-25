@@ -11,12 +11,21 @@ set(CMAKE_BUILD_TYPE Debug)
 add_subdirectory( lib )
 add_subdirectory( src )
 
+# Set root directory of source code
+set(
+    BUILD_SRC_DIR
+    "/home/vostrocfd/git/CFD_Disciplines/cc-297"
+    CACHE PATH
+    "Sets root directory of source code."
+    FORCE
+)
+
 # add the binary tree to the search path for include files
 target_include_directories(
     ${PROJECT_NAME} PUBLIC
     "${PROJECT_BINARY_DIR}"
-    "${PROJECT_SOURCE_DIR}/src"
-    "${PROJECT_SOURCE_DIR}/lib"
+    "${BUILD_SRC_DIR}/src"
+    "${BUILD_SRC_DIR}/lib"
 )
 
 target_link_libraries( ${PROJECT_NAME} PUBLIC lib )

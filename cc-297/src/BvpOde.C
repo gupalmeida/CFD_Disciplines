@@ -37,8 +37,20 @@ BvpOde::~BvpOde()
 void BvpOde::Solve()
 {
     populateMatrix();
+    // debugging
+    // ************************
+    //std::cout<< "Resulting matrix of coefficients\n" << std::endl;
+    //print( (*mpLinMat) );
+    // ************************
     populateVector();
     applyBCs();
+    // debugging
+    // ************************
+    std::cout<< "Resulting matrix of coefficients\n" << std::endl;
+    print( (*mpLinMat) );
+    std::cout<< "Printing RHS vector\n" << std::endl;
+    print( (*mpRHS) );
+    // ************************
     mpLinSys = new LinSys( *mpLinMat, *mpRHS );
     *mpSolution = mpLinSys->Solve();
     writeSolutionToFile( "solution.out" );
@@ -46,7 +58,9 @@ void BvpOde::Solve()
 
 void BvpOde::populateMatrix()
 {
-    for ( int i = 1; i < mNumOfNodes-1; i++)
+    // loop trhough all internal points of the
+    // computational mesh
+    for ( int i = 1; i < mNumOfNodes-1; i++ )
     {
         // xm, x and xp are, respectively, x-1, x and x+1
         double xm = mpMesh->mNodes[i-1].xCoord;
@@ -71,11 +85,18 @@ void BvpOde::populateMatrix()
 
 void BvpOde::populateVector()
 {
+    // loop trhough elements corresponding to internal
+    // points of computational mesh
     for (int i = 1; i < mNumOfNodes-1; i++)
     {
         double x = mpMesh->mNodes[i].xCoord;
         (*mpRHS)(i) = mpOde->mpRhsFunction(x);
     }
+    // debugging
+    // ************************
+    //std::cout<< "Printing RHS vector\n" << std::endl;
+    //print( (*mpRHS) );
+    // ************************
 }
 
 void BvpOde::applyBCs()
