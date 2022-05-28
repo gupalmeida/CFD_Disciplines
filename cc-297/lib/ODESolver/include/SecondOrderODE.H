@@ -5,7 +5,6 @@
 #include <cmath>
 #include <vector>
 
-#include "Aux.H"
 #include "Vector.H"
 #include "Matrix.H"
 

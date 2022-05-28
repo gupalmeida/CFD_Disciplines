@@ -4,8 +4,7 @@
 #include <cmath>
 #include <cassert>
 #include <iostream>
-
-#include "Aux.H"
+using namespace std;
 
 class Vector
 {

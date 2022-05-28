@@ -5,8 +5,8 @@
 #include <cmath>
 #include <vector>
 #include <cassert>
+using namespace std;
 
-#include "Aux.H"
 #include "Node.H"
 
 class Mesh

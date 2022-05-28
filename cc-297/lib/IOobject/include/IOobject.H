@@ -5,11 +5,6 @@
 #include <fstream>
 #include <cassert>
 #include <string>
-
-#include "Aux.H"
-#include "Vector.H"
-#include "Matrix.H"
-
 using namespace std;
 
 template<class T>

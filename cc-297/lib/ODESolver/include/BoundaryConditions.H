@@ -5,8 +5,6 @@
 #include <cmath>
 #include <cassert>
 
-#include "Aux.H"
-
 class BoundaryConditions
 {
     public:

@@ -4,8 +4,8 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+using namespace std;
 
-#include "Aux.H"
 #include "Matrix.H"
 #include "Vector.H"
 
