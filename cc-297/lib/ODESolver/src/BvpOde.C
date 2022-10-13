@@ -37,22 +37,12 @@ BvpOde::~BvpOde()
 void BvpOde::Solve()
 {
     populateMatrix();
-    // debugging
-    // ************************
-    //std::cout<< "Resulting matrix of coefficients\n" << std::endl;
-    //print( (*mpLinMat) );
-    // ************************
     populateVector();
     applyBCs();
-    // debugging
-    // ************************
-    std::cout<< "Resulting matrix of coefficients\n" << std::endl;
-    print( (*mpLinMat) );
-    std::cout<< "Printing RHS vector\n" << std::endl;
-    print( (*mpRHS) );
-    // ************************
+    
     mpLinSys = new LinSys( *mpLinMat, *mpRHS );
     *mpSolution = mpLinSys->Solve();
+    print( *mpSolution );
     writeSolutionToFile( "solution.out" );
 }
 
@@ -92,11 +82,6 @@ void BvpOde::populateVector()
         double x = mpMesh->mNodes[i].xCoord;
         (*mpRHS)(i) = mpOde->mpRhsFunction(x);
     }
-    // debugging
-    // ************************
-    //std::cout<< "Printing RHS vector\n" << std::endl;
-    //print( (*mpRHS) );
-    // ************************
 }
 
 void BvpOde::applyBCs()
