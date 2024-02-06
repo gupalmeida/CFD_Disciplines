@@ -1,4 +1,4 @@
-#include "Vector.H"
+#include "Vector.h"
 
 // constructor for vector with given size
 // initializing the new instance with all zeros

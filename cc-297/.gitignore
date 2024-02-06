@@ -1,2 +1,5 @@
-.ccls-cache
-.vscode
+tests/
+build/
+CMakeCache.txt
+CMakeFiles/
+Makefile

@@ -1,4 +1,4 @@
-#include "Matrix.H"
+#include "Matrix.h"
 
 // new matrix constructor
 Matrix::Matrix( int numRows, int numCols )

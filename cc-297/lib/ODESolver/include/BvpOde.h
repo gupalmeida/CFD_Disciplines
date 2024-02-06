@@ -6,13 +6,13 @@
 #include <cassert>
 #include <string>
 
-#include "Vector.H"
-#include "Matrix.H"
-#include "LinSys.H"
-#include "Mesh.H"
-#include "SecondOrderODE.H"
-#include "BoundaryConditions.H"
-#include "IOobject.H"
+#include "Vector.h"
+#include "Matrix.h"
+#include "LinSys.h"
+#include "Mesh.h"
+#include "SecondOrderODE.h"
+#include "BoundaryConditions.h"
+#include "IOobject.h"
 
 class BvpOde
 {

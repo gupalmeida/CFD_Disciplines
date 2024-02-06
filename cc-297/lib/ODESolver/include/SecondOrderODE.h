@@ -5,8 +5,8 @@
 #include <cmath>
 #include <vector>
 
-#include "Vector.H"
-#include "Matrix.H"
+#include "Vector.h"
+#include "Matrix.h"
 
 class SecondOrderODE
 {
@@ -28,6 +28,7 @@ class SecondOrderODE
         double mXmax;
 
     public:
+        // Constructor
         SecondOrderODE
         (
             double coeffUxx,

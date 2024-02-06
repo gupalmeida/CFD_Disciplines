@@ -1,11 +1,11 @@
 #include <iostream>
 #include <chrono>
 
-#include "Matrix.H"
-#include "Vector.H"
-// #include "SecondOrderODE.H"
-// #include "LinSys.H"
-// #include "IOobject.H"
+#include "Matrix.h"
+#include "Vector.h"
+// #include "SecondOrderODE.h"
+// #include "LinSys.h"
+// #include "IOobject.h"
 
 int main()
 {

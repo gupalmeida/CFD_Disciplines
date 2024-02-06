@@ -1,19 +1,10 @@
-# Set the project name
-project (libioobjects)
-
-add_library(
-    ${PROJECT_NAME}
-    INTERFACE
-)
-
 add_library(
     libioobj
-    ALIAS
-    ${PROJECT_NAME}
+    INTERFACE
 )
 
 target_include_directories(
-    ${PROJECT_NAME}
+    libioobj
     INTERFACE
-    ${PROJECT_SOURCE_DIR}/include
+    include
 )

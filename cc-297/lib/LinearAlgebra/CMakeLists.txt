@@ -1,22 +1,12 @@
-# Set the project name
-project (liblinearAlgebra)
-
-# Add a library with the above sources
-add_library(
-    ${PROJECT_NAME}
-    src/LinSys.C
-    src/Matrix.C
-    src/Vector.C
-)
-
 add_library(
     liblinAlg
-    ALIAS
-    ${PROJECT_NAME}
+    src/LinSys.cpp
+    src/Matrix.cpp
+    src/Vector.cpp
 )
 
 target_include_directories(
-    ${PROJECT_NAME}
+    liblinAlg
     PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    include
 )

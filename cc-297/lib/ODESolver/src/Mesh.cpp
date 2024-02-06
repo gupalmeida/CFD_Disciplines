@@ -1,4 +1,4 @@
-#include "Mesh.H"
+#include "Mesh.h"
 
 Mesh::Mesh(double xMin, double xMax, int numNodes)
 {

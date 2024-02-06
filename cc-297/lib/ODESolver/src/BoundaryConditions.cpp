@@ -1,4 +1,4 @@
-#include "BoundaryConditions.H"
+#include "BoundaryConditions.h"
 
 BoundaryConditions::BoundaryConditions()
 {

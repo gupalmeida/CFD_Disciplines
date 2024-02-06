@@ -7,7 +7,7 @@
 #include <cassert>
 using namespace std;
 
-#include "Node.H"
+#include "Node.h"
 
 class Mesh
 {

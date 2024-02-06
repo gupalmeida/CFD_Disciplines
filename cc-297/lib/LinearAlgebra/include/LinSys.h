@@ -6,8 +6,8 @@
 #include <cassert>
 using namespace std;
 
-#include "Matrix.H"
-#include "Vector.H"
+#include "Matrix.h"
+#include "Vector.h"
 
 class LinSys
 {

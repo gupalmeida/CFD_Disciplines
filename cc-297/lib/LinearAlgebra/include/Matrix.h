@@ -6,7 +6,7 @@
 #include <cassert>
 using namespace std;
 
-#include "Vector.H"
+#include "Vector.h"
 
 class Matrix
 {

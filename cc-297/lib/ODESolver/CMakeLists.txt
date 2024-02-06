@@ -1,28 +1,18 @@
-# Set the project name
-project (libodeSolver)
-
-# Add a library with the above sources
-add_library(
-    ${PROJECT_NAME}
-    src/BoundaryConditions.C
-    src/BvpOde.C
-    src/Mesh.C
-)
-
 add_library(
     libode
-    ALIAS
-    ${PROJECT_NAME}
+    src/BoundaryConditions.cpp
+    src/BvpOde.cpp
+    src/Mesh.cpp
 )
 
 target_include_directories(
-    ${PROJECT_NAME}
+    libode
     PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    include
 )
 
 target_link_libraries(
-    ${PROJECT_NAME}
+    libode
     liblinAlg
     libioobj
 )
