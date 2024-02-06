@@ -1,10 +1,10 @@
 add_library(
     libioobj
-    src/IOobject.cpp
+    INTERFACE
 )
 
 target_include_directories(
     libioobj
-    PUBLIC
+    INTERFACE
     include
 )
