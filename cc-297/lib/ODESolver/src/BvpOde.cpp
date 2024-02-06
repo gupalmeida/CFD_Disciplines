@@ -40,14 +40,16 @@ void BvpOde::Solve()
   populateVector();
   applyBCs();
 
-  print( *mpLinMat );
-  std::cout << "\n";
-  print( *mpRHS );
-  std::cout << "\n";
+  //print( *mpLinMat );
+  //std::cout << "\n";
+  //print( *mpRHS );
+  //std::cout << "\n";
 
   mpLinSys = new LinSys( *mpLinMat, *mpRHS );
+  std::cout << "Running linear solver.\n";
   *mpSolution = mpLinSys->Solve();
-  print( *mpSolution );
+  //print( *mpSolution );
+  std::cout << "Writing solution to file.\n";
   writeSolutionToFile( "solution.out" );
 }
 
