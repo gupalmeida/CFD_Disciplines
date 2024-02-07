@@ -4,56 +4,56 @@
 // initializing the new instance with all zeros
 Vector::Vector( int size )
 {
-    assert( size > 0 );
-    mSize = size;
-    mData = new double [mSize];
-    for (int i = 0; i < mSize; i++)
-    {
-        mData[i] = 0.0;
-    }
+  assert( size > 0 );
+  mSize = size;
+  mData = new double [mSize];
+  for (int i = 0; i < mSize; i++)
+  {
+    mData[i] = 0.0;
+  }
 }
 
 // constructor for when copying another vector
 Vector::Vector( const Vector& v )
 {
-    assert( v.mSize > 0 );
-    mSize = v.mSize;
-    mData = new double [mSize];
-    for (int i = 0; i < mSize; i++)
-    {
-        mData[i] = v.mData[i];
-    }
+  assert( v.mSize > 0 );
+  mSize = v.mSize;
+  mData = new double [mSize];
+  for (int i = 0; i < mSize; i++)
+  {
+    mData[i] = v.mData[i];
+  }
 }
 
 // destructor
 Vector::~Vector()
 {
-    delete[] mData;
+  delete[] mData;
 }
 
 // vector initialization
 void Vector::ones()
 {
-    assert( mSize > 0 );
-    for ( int i = 0; i < mSize; i++ )
-    {
-        mData[i] = 1.0;
-    }
+  assert( mSize > 0 );
+  for ( int i = 0; i < mSize; i++ )
+  {
+    mData[i] = 1.0;
+  }
 }
 
 // vector info and printing
 int Vector::size() const
 {
-    return mSize;
+  return mSize;
 }
 
 void Vector::print() const
 {
-    assert( mSize > 0 );
-    for (int i = 0; i < mSize; i++)
-    {
-        cout << mData[i] << '\n';
-    }
+  assert( mSize > 0 );
+  for (int i = 0; i < mSize; i++)
+  {
+    std::cout << mData[i] << '\n';
+  }
 }
 
 void Vector::print( int i ) const
@@ -61,7 +61,7 @@ void Vector::print( int i ) const
     // verify index is within bounds
     assert( i > -1 );
     assert( i < mSize );
-    cout << mData[i] << '\n';
+    std::cout << mData[i] << '\n';
 }
 
 // reading vector element
@@ -179,6 +179,6 @@ void print( const Vector& v )
     assert( v.mSize > 0 );
     for ( int i = 0; i < v.mSize; i++ )
     {
-        cout << v.mData[i] << '\n';
+        std::cout << v.mData[i] << '\n';
     }
 }

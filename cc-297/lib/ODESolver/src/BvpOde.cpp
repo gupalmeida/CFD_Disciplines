@@ -40,16 +40,13 @@ void BvpOde::Solve()
   populateVector();
   applyBCs();
 
-  //print( *mpLinMat );
-  //std::cout << "\n";
-  //print( *mpRHS );
-  //std::cout << "\n";
-
   mpLinSys = new LinSys( *mpLinMat, *mpRHS );
+  
   std::cout << "Running linear solver.\n";
   *mpSolution = mpLinSys->Solve();
-  //print( *mpSolution );
   std::cout << "Writing solution to file.\n";
+
+  // writting solution vector to file
   writeSolutionToFile( "solution.out" );
 }
 
@@ -133,8 +130,8 @@ void BvpOde::applyBCs()
       right_bc_applied = true;
   }
 
-  assert( left_bc_applied = true );
-  assert( right_bc_applied = true );
+  assert( left_bc_applied == true );
+  assert( right_bc_applied == true );
 }
 
 // friend functions

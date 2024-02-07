@@ -11,16 +11,16 @@ using namespace std;
 
 class LinSys
 {
-    private:
-        int mSize;
-        Matrix* mpA;
-        Vector* mpb;
+private:
+  int mSize;
+  Matrix* mpA;
+  Vector* mpb;
 
-    public:
-        LinSys(const Matrix& A, const Vector& b);
-        ~LinSys();
+public:
+  LinSys(const Matrix& A, const Vector& b);
+  ~LinSys();
 
-        virtual Vector Solve();
+  virtual Vector Solve();
 };
 
 #endif

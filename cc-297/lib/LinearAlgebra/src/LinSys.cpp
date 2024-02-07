@@ -3,11 +3,13 @@
 
 LinSys::LinSys(const Matrix& A, const Vector& b)
 {
-  mSize = A.getNumRows();
-
   // check matrix and vector are of same size
   assert( A.getNumCols() == mSize );
   assert( b.size() == mSize );
+
+  // define size of solution vector same
+  // as associated matrix
+  mSize = A.getNumRows();
 
   mpA = new Matrix(A); // using copy constructor
   mpb = new Vector(b); // using copy constructor
